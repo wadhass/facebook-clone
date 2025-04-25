@@ -1,0 +1,45 @@
+/* .comments {
+    padding: 10px;
+    border-top: 1px solid #ddd;
+  }
+  
+  .writebox {
+    display: flex;
+    align-items: center;
+    padding-top: 10px;
+  }
+  
+  .user {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+  }
+  
+  .profile-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+  }
+  
+  .comment-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    outline: none;
+  }
+  
+  .btn-primary {
+    background-color: #7b4fff;
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+  
+  .btn-primary:hover {
+    background-color: #5e35c7;
+  }
+   */
