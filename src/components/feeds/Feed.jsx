@@ -20,7 +20,7 @@ export default function Feed ({fed}) {
         console.log(Comments)
     }
   return (
-    <div className='feed'>
+    <div className='feed' key={fed.userid}>
         <div className='top-content'>
             <Link to='/profile/id'>
             <div className="user">

@@ -1,7 +1,14 @@
-import React from 'react'
 
+// Components...........
+import AddPost from "../../components/addPost/AddPost"
+import Feeds from "../../components/feeds/Feeds"
+import UserProfile from "../../components/userProfile/UserProfile"
 export default function Profile (){
   return (
-    <div>Profile</div>
+    <>
+    <UserProfile />
+    <AddPost/>
+    <Feeds />
+    </>
   )
 }
