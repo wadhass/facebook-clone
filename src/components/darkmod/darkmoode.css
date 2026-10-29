@@ -1,5 +1,10 @@
 .dark-mood-icon{
     transition: .3s ease;
+    padding: 0;
+    cursor: pointer;
+    color: var(--color-primary);
+    background: transparent;
+    font-size: 1.1rem;
 }
 .dark-mood-icon:hover{
     transform: scale(1.2);

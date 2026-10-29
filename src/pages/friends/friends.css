@@ -1,0 +1,98 @@
+.friends-page {
+  margin: 20px 0;
+  padding: 20px;
+  border-radius: 12px;
+  background: var(--color-card);
+}
+
+.friends-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.friends-header p {
+  margin-top: 6px;
+}
+
+.friends-header input {
+  width: min(280px, 45%);
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  background: var(--color-bg);
+  color: var(--text-color);
+}
+
+.friends-tabs,
+.friend-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.friends-tabs {
+  margin: 20px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.friends-tabs button {
+  padding: 10px 14px;
+  background: transparent;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.friends-page .friends-list > p {
+  color: var(--color-soft);
+}
+
+.friends-tabs button.active {
+  color: var(--color-primary);
+  border-bottom: 2px solid var(--color-primary);
+}
+
+.friends-list {
+  display: grid;
+  gap: 10px;
+}
+
+.friend-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+}
+
+.friend-card .user {
+  min-width: 0;
+  color: var(--text-color);
+}
+
+.friend-card .user h3 {
+  font-size: 1rem;
+}
+
+.friend-card .user img {
+  width: 44px;
+  height: 44px;
+}
+
+@media (max-width: 540px) {
+  .friends-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .friends-header input {
+    width: 100%;
+  }
+
+  .friend-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

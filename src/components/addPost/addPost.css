@@ -37,3 +37,30 @@
 .post-categories span:hover{
     color: var(--color-primary);
 }
+.post-media-picker{
+    align-self: flex-start;
+    color: var(--color-primary);
+    cursor: pointer;
+    padding: 0 1rem;
+}
+.post-media-picker input{
+    display: block;
+    margin-top: .5rem;
+    max-width: 100%;
+}
+.post-media-preview{
+    width: 100%;
+    display: grid;
+    gap: .75rem;
+    padding: 0 1rem;
+}
+.post-media-preview img,
+.post-media-preview video{
+    max-height: 400px;
+    width: 100%;
+    object-fit: contain;
+    border-radius: .5rem;
+}
+.post-media-preview .btn{
+    justify-self: start;
+}

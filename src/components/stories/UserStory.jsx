@@ -1,24 +1,24 @@
 import './userStory.css'
 
-// Fack Apis.........
-import CurrentUserData from '../../FackApis/CurrentUserData'
-
-// FontAwesome Icon .........
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faAdd } from '@fortawesome/free-solid-svg-icons'
-
-export default function UserStory () {
+export default function UserStory ({ user, onCreate, uploading }) {
   return (
-    <div className='story userStory'>
-         <div className="user">
-            <img src={CurrentUserData.map(user=>(user.ProfieImage))} alt="" />
-          </div>
-           <img src={CurrentUserData.map(user=>(user.CoverPhoto))} alt="" />
-           <label htmlFor='storyFiles'>
-           <FontAwesomeIcon icon={faAdd}/> 
-           <input type="file" id='storyFiles' />
-            </label> 
-            <h5>Add Story</h5>      
-    </div>
+    <label className='story userStory'>
+      {user?.avatar
+        ? <img className='story-avatar' src={user.avatar} alt='' />
+        : <span className='story-avatar story-avatar-placeholder'>{user?.name?.[0] ?? '?'}</span>}
+      <span className='story-add-button' aria-hidden='true'>{uploading ? '…' : '+'}</span>
+      <input
+        type='file'
+        accept='image/*,video/*'
+        aria-label='Add a story photo or video'
+        disabled={uploading}
+        onChange={(event) => {
+          const file = event.target.files?.[0]
+          event.target.value = ''
+          if (file) onCreate(file)
+        }}
+      />
+      <h5>{uploading ? 'Uploading…' : 'Add story'}</h5>
+    </label>
   )
 }

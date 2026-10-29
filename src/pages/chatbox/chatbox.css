@@ -19,6 +19,18 @@
     gap: .7rem;
     padding: 1rem 0;
 }
+.chat-messages{
+    width: 80%;
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 0;
+}
+.chat-messages p{
+    background: var(--color-bg);
+    padding: .7rem;
+    border-radius: .5rem;
+    margin: .4rem 0;
+}
 .chat-box img{
     width: 100px;
     border-radius: 50%;
@@ -55,6 +67,9 @@
         min-height: 80vh;
     }
     .chat-box-top{
+        width: 90%;
+    }
+    .chat-messages{
         width: 90%;
     }
     .chat-box-bottom{

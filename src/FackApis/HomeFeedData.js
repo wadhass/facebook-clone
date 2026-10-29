@@ -1,13 +1,11 @@
 
 import feedProfile1 from '../assets/img/FeedProfile1.jpg';
-import feedProfile2 from '../assets/img/FeedProfile2.jpg';
 import feedProfile3 from '../assets/img/FeedProfile3.jpg';
 import feedProfile4 from '../assets/img/FeedProfile4.webp';
 import feedProfile5 from '../assets/img/FeedProfile5.jpg';
 import feedProfile6 from '../assets/img/FeedProfile6.webp';
 import feedProfile7 from '../assets/img/FeedProfile7.jpg';
 import feedProfile8 from '../assets/img/FeedProfile8.jpeg';
-import feedProfile9 from '../assets/img/FeedProfile9.jpg';
 import feedProfile10 from '../assets/img/FeedProfile10.jpg';
 import feedProfile11 from '../assets/img/FeedProfile11.jpg';
 import feedProfile12 from '../assets/img/FeedProfile12.jpg';

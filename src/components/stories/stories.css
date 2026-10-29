@@ -1,16 +1,20 @@
 .stories{
     display: flex;
     align-items: center;
+    gap: 10px;
     margin-top: 20px;
     margin-bottom: 30px;
+    overflow-x: auto;
 }
 .story{
+    border: 0;
     height: 170px;
-    flex: 1;
+    flex: 0 0 115px;
     overflow: hidden;
     position: relative;
     user-select: none;
     border-radius: .5rem;
+    background: var(--color-card);
 }
 .story::after{
     position: absolute;
@@ -38,42 +42,137 @@
     text-align: center;
     z-index: 1;
 }
-.userStory{
-    margin-right: 10px;
-}
-.userStory label{
-    position: absolute;
+.story-card {
+    padding: 0;
+    cursor: pointer;
     color: white;
+}
+.story-card>img:not(.story-avatar),
+.story-card>video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.story-avatar {
+    position: absolute;
     z-index: 1;
-    font-size: 1.2rem;
+    top: 8px;
+    left: 8px;
+    width: 34px;
+    height: 34px;
+    border: 2px solid var(--color-primary);
+    border-radius: 50%;
+}
+.story-avatar-placeholder {
+    display: grid;
+    place-items: center;
+    color: white;
+    background: var(--color-primary);
+}
+.userStory {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 115px;
+    cursor: pointer;
+    border: 1px solid var(--color-border);
+}
+.userStory .story-avatar {
+    top: 20px;
     left: 50%;
-    transform: translate(-50%, -50%);
-    top: 70%;
-    padding: 7px;
+    width: 64px;
+    height: 64px;
+    transform: translateX(-50%);
+}
+.userStory .story-add-button {
+    position: absolute;
+    top: 74px;
+    left: 50%;
+    z-index: 2;
+    display: grid;
+    width: 28px;
+    height: 28px;
+    place-items: center;
+    transform: translateX(-50%);
+    border: 2px solid var(--color-card);
     border-radius: 50%;
     background: var(--color-primary);
-    display: flex;
+    color: white;
+    font-size: 1.4rem;
+    line-height: 1;
 }
-.userStory label input{
+.userStory input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+}
+.userStory h5 {
+    position: static;
+    margin-bottom: 12px;
+    color: var(--text-color);
+}
+.userStory::after {
     display: none;
 }
-
-/* .............Start Media Scrin...............*/
+.stories-empty,
+.stories-error {
+    padding: 8px;
+}
+.story-viewer-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: rgb(0 0 0 / 75%);
+}
+.story-viewer {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: min(440px, 100%);
+    max-height: 90vh;
+    padding: 14px;
+    border-radius: 12px;
+    background: var(--color-card);
+}
+.story-viewer header,
+.story-viewer footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+.story-viewer header {
+    color: var(--text-color);
+}
+.story-viewer header button {
+    padding: 4px 10px;
+    cursor: pointer;
+    color: var(--text-color);
+    background: transparent;
+    font-size: 1.5rem;
+}
+.story-viewer>img,
+.story-viewer>video {
+    width: 100%;
+    max-height: 65vh;
+    object-fit: contain;
+    background: black;
+}
+.story-viewer p {
+    color: var(--text-color);
+}
+.story-viewer footer {
+    justify-content: flex-end;
+}
 @media (max-width:991px){
-    .story{
-        border-radius: 50%;
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .story .user{
-        display: none;
-    }
     .story h5{
-        display: none;
-    }
-    .userStory label{
-        font-size: 1rem;
+        display: block;
     }
 }
