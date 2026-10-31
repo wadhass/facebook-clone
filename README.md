@@ -14,9 +14,15 @@ This template provides a minimal setup to get React working in Vite with HMR and
 
 ## Deploy to Render
 
-The `render.yaml` file configures this repository as a static site, including a rewrite so client-side routes such as `/login` and `/reset-password` load correctly. Connect the frontend repository to Render and create its Blueprint. Set `VITE_API_URL` to the deployed API URL followed by `/api`, for example `https://qavero-api.onrender.com/api`. Vite embeds this value at build time, so update it in the Render dashboard and redeploy whenever the API URL changes.
+The repository-root `render.yaml` configures both the frontend and API, including a rewrite so client-side routes such as `/login` and `/reset-password` load correctly. Create a Render Blueprint from the repository root. It connects the frontend to the API automatically; the frontend adds `/api` to the referenced API host during its build.
 
-Deploy the backend first and use the exact frontend site URL for the backend's `CLIENT_ORIGIN`. Follow the backend README for MongoDB, SMTP, and persistent upload disk setup. Keep all production credentials in the Render dashboard, not in this repository.
+Follow the backend README for MongoDB, SMTP, `CLIENT_ORIGIN`, and persistent upload disk setup. The Blueprint references the API host automatically; if you use a custom API domain, replace the `VITE_API_URL` reference in the repository-root `render.yaml` with the full API URL ending in `/api`, then redeploy the frontend. Keep all production credentials in the Render dashboard, not in this repository.
+
+## Deploy the frontend to Vercel
+
+Import the repository into Vercel and set the project root directory to `frontend`. The production build uses `VITE_API_URL` from `frontend/.env.production` and Vercel's rewrite serves the React app for client-side routes. After deployment, set the backend Render service's `CLIENT_ORIGIN` environment variable to the exact Vercel site origin (for example, `https://your-project.vercel.app`, without a trailing slash), then redeploy the backend. If the API URL changes, update `VITE_API_URL` in the Vercel project settings and redeploy.
+
+Do not put database, JWT, or SMTP credentials in frontend files or Vercel frontend environment variables.
 
 Currently, two official plugins are available:
 

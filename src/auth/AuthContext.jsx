@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { apiRequest } from '../api'
 import AuthContext from './context'
 
@@ -23,26 +23,55 @@ export function AuthProvider({ children }) {
       .finally(() => setLoading(false))
   }, [])
 
-  async function authenticate(endpoint, credentials) {
+  const saveSession = useCallback((result) => {
+    localStorage.setItem('authToken', result.token)
+    setUser(result.user)
+    setAuthError('')
+  }, [])
+
+  const authenticate = useCallback(async (endpoint, credentials) => {
     const result = await apiRequest(endpoint, {
       method: 'POST',
       body: JSON.stringify(credentials),
     })
-    localStorage.setItem('authToken', result.token)
-    setUser(result.user)
-    setAuthError('')
-  }
+    saveSession(result)
+    return result
+  }, [saveSession])
 
-  function signOut() {
+  const signUp = useCallback(async (data) => {
+    return apiRequest('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  }, [])
+
+  const verifyEmail = useCallback(async (data) => {
+    const result = await apiRequest('/auth/verify-email', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+    saveSession(result)
+  }, [saveSession])
+
+  const updateAvatar = useCallback(async (file) => {
+    const body = new FormData()
+    body.append('avatar', file)
+    const result = await apiRequest('/users/me/avatar', { method: 'PATCH', body })
+    setUser((currentUser) => currentUser ? { ...currentUser, avatar: result.user.avatar } : currentUser)
+    return result.user
+  }, [])
+
+  const signOut = useCallback(() => {
     localStorage.removeItem('authToken')
     setUser(null)
     setAuthError('')
-  }
+  }, [])
+
+  const signIn = useCallback((data) => authenticate('/auth/login', data), [authenticate])
 
   const value = useMemo(
-    () => ({ user, loading, authError, signIn: (data) => authenticate('/auth/login', data),
-      signUp: (data) => authenticate('/auth/signup', data), signOut }),
-    [user, loading, authError],
+    () => ({ user, loading, authError, signIn, signUp, verifyEmail, updateAvatar, signOut }),
+    [user, loading, authError, signIn, signUp, verifyEmail, updateAvatar, signOut],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

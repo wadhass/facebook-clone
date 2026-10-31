@@ -2,7 +2,7 @@ import './addPost.css'
 
 import { useEffect, useState } from 'react'
 import { useAuth } from '../../auth/useAuth'
-import { apiRequest } from '../../api'
+import { apiRequest, getMediaUrl } from '../../api'
 
 const MAX_MEDIA_SIZE = 50 * 1024 * 1024
 
@@ -70,7 +70,7 @@ export default function AddPost () {
   return (
    <form className='postForm' onSubmit={handleSubmit}>
     <div className='user form-top'>
-        {user?.avatar && <img src={user.avatar} alt="" />}
+        {user?.avatar && <img src={getMediaUrl(user.avatar)} alt="" />}
         <input
           type="text"
           value={text}

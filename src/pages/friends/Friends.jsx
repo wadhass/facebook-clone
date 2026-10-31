@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { apiRequest } from '../../api'
+import { apiRequest, getMediaUrl } from '../../api'
 import './friends.css'
 
 const tabs = ['friends', 'requests', 'discover']
@@ -118,7 +118,7 @@ export default function Friends() {
           {filteredFriends.map((friend) => (
             <article className='friend-card' key={friend.id}>
               <Link to={`/profile/${friend.id}`} className='user'>
-                {friend.avatar && <img src={friend.avatar} alt='' />}
+                {friend.avatar && <img src={getMediaUrl(friend.avatar)} alt='' />}
                 <h3>{friend.name}</h3>
               </Link>
               <Link className='btn btn-primary' to={`/chatbox/${friend.id}`}>
@@ -135,7 +135,7 @@ export default function Friends() {
           {data.incoming.map((request) => (
             <article className='friend-card' key={request.id}>
               <Link to={`/profile/${request.user.id}`} className='user'>
-                {request.user.avatar && <img src={request.user.avatar} alt='' />}
+                {request.user.avatar && <img src={getMediaUrl(request.user.avatar)} alt='' />}
                 <h3>{request.user.name}</h3>
               </Link>
               <div className='friend-actions'>
@@ -159,7 +159,7 @@ export default function Friends() {
           {data.outgoing.map((request) => (
             <article className='friend-card' key={request.id}>
               <Link to={`/profile/${request.user.id}`} className='user'>
-                {request.user.avatar && <img src={request.user.avatar} alt='' />}
+                {request.user.avatar && <img src={getMediaUrl(request.user.avatar)} alt='' />}
                 <h3>{request.user.name}</h3>
               </Link>
               <button
@@ -182,7 +182,7 @@ export default function Friends() {
           {suggestions.filter((person) => !connectedIds.has(person.id)).map((person) => (
             <article className='friend-card' key={person.id}>
               <Link to={`/profile/${person.id}`} className='user'>
-                {person.avatar && <img src={person.avatar} alt='' />}
+                {person.avatar && <img src={getMediaUrl(person.avatar)} alt='' />}
                 <h3>{person.name}</h3>
               </Link>
               <button

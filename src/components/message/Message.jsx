@@ -1,7 +1,7 @@
 import './message.css'
 import { Link } from 'react-router-dom'
 import { useCallback, useEffect, useState } from 'react'
-import { apiRequest } from '../../api'
+import { apiRequest, getMediaUrl } from '../../api'
 
 // FontAwesome Icon.........
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -49,7 +49,7 @@ export default function Message () {
           <Link to={`/chatbox/${friend.id}`} key={friend.id}>
             <div className='message'>
               <div className="user">
-                {friend.avatar && <img src={friend.avatar} alt="" />}
+                {friend.avatar && <img src={getMediaUrl(friend.avatar)} alt="" />}
               </div>
               <div className="message-body">
                 <h5>{friend.name}</h5>

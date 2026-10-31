@@ -2,6 +2,7 @@ import './nav.css'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
+import { getMediaUrl } from '../../api'
 
 // Components.........
 import DarkMoode from '../darkmod/DarkMoode';
@@ -67,7 +68,7 @@ export default function Nav  () {
           </Link>
           <DarkMoode />
           <div className="user">
-            {user?.avatar && <img src={user.avatar} alt="" />}
+            {user?.avatar && <img src={getMediaUrl(user.avatar)} alt="" />}
             <h4>{user?.name}</h4>
           </div>
           <button className='btn' type='button' onClick={handleSignOut}>Log out</button>

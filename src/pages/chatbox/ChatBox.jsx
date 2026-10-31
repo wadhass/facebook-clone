@@ -2,7 +2,7 @@ import './chatbox.css'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { apiRequest } from '../../api'
+import { apiRequest, getMediaUrl } from '../../api'
 import { useAuth } from '../../auth/useAuth'
 
 // Font Awesome icon.........
@@ -76,7 +76,7 @@ export default function ChatBox () {
     <>
     <div className="chat-box">
     <div className="chat-box-top">
-    {friend?.avatar && <img src={friend.avatar} alt="" />}
+    {friend?.avatar && <img src={getMediaUrl(friend.avatar)} alt="" />}
       <div className="user-name">
         <h3>{friend?.name ?? 'Conversation'}</h3>
       </div>

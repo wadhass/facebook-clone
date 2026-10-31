@@ -4,6 +4,7 @@ import Login from '../pages/login/Login'
 import Signup from '../pages/signup/Signup'
 import ForgotPassword from '../pages/auth/ForgotPassword'
 import ResetPassword from '../pages/auth/ResetPassword'
+import VerifyEmail from '../pages/auth/VerifyEmail'
 import Home from '../pages/home/Home'
 import Profile from '../pages/profile/Profile'
 import ChatBox from '../pages/chatbox/ChatBox'
@@ -49,6 +50,8 @@ const router = createBrowserRouter([
   { path: '/signup', element: <Signup /> },
   { path: '/forgot-password', element: <ForgotPassword /> },
   { path: '/reset-password', element: <ResetPassword /> },
+  { path: '/reset-password/:token', element: <ResetPassword /> },
+  { path: '/verify-email', element: <VerifyEmail /> },
 ])
 
 export default function LayOut() {

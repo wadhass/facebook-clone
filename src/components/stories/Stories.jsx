@@ -99,7 +99,7 @@ export default function Stories () {
           {group.stories[0].mediaType === 'video'
             ? <video src={getMediaUrl(group.stories[0].mediaUrl)} muted />
             : <img src={getMediaUrl(group.stories[0].mediaUrl)} alt='' />}
-          {group.author.avatar && <img className='story-avatar' src={group.author.avatar} alt='' />}
+          {group.author.avatar && <img className='story-avatar' src={getMediaUrl(group.author.avatar)} alt='' />}
           <h5>{group.author.name}</h5>
         </button>
       ))}

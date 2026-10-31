@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
-import { apiRequest } from '../../api'
+import { apiRequest, getMediaUrl } from '../../api'
 
 // Font Awesome icon.........
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -11,12 +11,14 @@ import { faFeed, faMessage } from '@fortawesome/free-solid-svg-icons'
 
 export default function UserProfile () {
   const { id } = useParams()
-  const { user: currentUser } = useAuth()
+  const { user: currentUser, updateAvatar } = useAuth()
   const [profile, setProfile] = useState(null)
   const [error, setError] = useState('')
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [friendStatus, setFriendStatus] = useState('none')
   const [requestId, setRequestId] = useState(null)
   const isSelf = currentUser?.id === id
+  const MAX_AVATAR_SIZE = 5 * 1024 * 1024
 
   useEffect(() => {
     setProfile(null)
@@ -62,18 +64,58 @@ export default function UserProfile () {
     }
   }
 
-  if (error) return <p role='alert'>{error}</p>
-  if (!profile) return <p role='status'>Loading profile...</p>
+  async function handleAvatarChange(event) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    setError('')
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setError('Choose an image file for your profile picture.')
+      return
+    }
+    if (file.size > MAX_AVATAR_SIZE) {
+      setError('Profile pictures must be 5 MB or smaller.')
+      return
+    }
+
+    setUploadingAvatar(true)
+    try {
+      const updatedUser = await updateAvatar(file)
+      setProfile((currentProfile) => ({ ...currentProfile, avatar: updatedUser.avatar }))
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setUploadingAvatar(false)
+    }
+  }
+
+  if (!profile) {
+    if (error) return <p role='alert'>{error}</p>
+    return <p role='status'>Loading profile...</p>
+  }
 
   return (
     <div className='userProfile'>
         <div className="cover-photos"></div>
         <div className="profile-info">
-            {profile.avatar && <img src={profile.avatar} alt="" />}
+            {profile.avatar && <img src={getMediaUrl(profile.avatar)} alt={`${profile.name}'s profile`} />}
             <div className="user-name">
                 <h3>{profile.name}</h3>
             </div>
+            {error && <p role='alert'>{error}</p>}
             <div className="profile-button">
+                {isSelf && (
+                  <label className='btn btn-primary profile-avatar-upload'>
+                    {uploadingAvatar ? 'Uploading picture...' : profile.avatar ? 'Change picture' : 'Add profile picture'}
+                    <input
+                      type='file'
+                      accept='image/*'
+                      onChange={handleAvatarChange}
+                      disabled={uploadingAvatar}
+                      aria-label='Choose a profile picture'
+                    />
+                  </label>
+                )}
                 {!isSelf && friendStatus === 'friends' && (
                   <>
                     <Link to={`/chatbox/${id}`} className='btn btn-primary'>

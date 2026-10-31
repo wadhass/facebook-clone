@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import './leftbar.css'
 import { useAuth } from '../../auth/useAuth'
+import { getMediaUrl } from '../../api'
 
 export default function LeftBar  ()  {
   const { user } = useAuth()
@@ -11,7 +12,7 @@ export default function LeftBar  ()  {
     <div className='menu'>
       <Link to={`/profile/${user?.id ?? ''}`}>
       <div className='user'>
-        {user?.avatar && <img src={user.avatar} alt="" />}
+        {user?.avatar && <img src={getMediaUrl(user.avatar)} alt="" />}
         <h4>{user?.name}</h4>
       </div>
       </Link>

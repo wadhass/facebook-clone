@@ -1,15 +1,16 @@
 import { useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { apiRequest } from '../../api'
 import AuthLayout from '../../components/auth/AuthLayout'
 import PasswordInput from '../../components/auth/PasswordInput'
 
 export default function ResetPassword() {
+  const { token: routeToken } = useParams()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const token = searchParams.get('token')
+  const token = routeToken ?? searchParams.get('token')
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -25,9 +26,9 @@ export default function ResetPassword() {
     }
 
     try {
-      await apiRequest('/auth/reset-password', {
+      await apiRequest(`/auth/reset-password/${encodeURIComponent(token)}`, {
         method: 'POST',
-        body: JSON.stringify({ token, password }),
+        body: JSON.stringify({ password }),
       })
       navigate('/login', { replace: true, state: { message: 'Your password has been reset. Sign in with your new password.' } })
     } catch (requestError) {

@@ -8,20 +8,24 @@ export default function Login() {
   const { signIn } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
+  const [email, setEmail] = useState('')
   const [error, setError] = useState('')
+  const [needsVerification, setNeedsVerification] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
   async function handleSubmit(event) {
     event.preventDefault()
     setError('')
+    setNeedsVerification(false)
     setSubmitting(true)
     const form = new FormData(event.currentTarget)
 
     try {
-      await signIn({ email: form.get('email'), password: form.get('password') })
+      await signIn({ email, password: form.get('password') })
       navigate('/')
     } catch (requestError) {
       setError(requestError.message)
+      setNeedsVerification(requestError.status === 403)
     } finally {
       setSubmitting(false)
     }
@@ -50,6 +54,8 @@ export default function Login() {
             required
             placeholder='you@example.com'
             autoComplete='email'
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
           />
         </div>
         <PasswordInput
@@ -61,7 +67,11 @@ export default function Login() {
         <div className='auth-form-options'>
           <Link to='/forgot-password'>Forgot password?</Link>
         </div>
-        {error && <p className='auth-message auth-message--error' role='alert'>{error}</p>}
+        {error && (
+          <p className='auth-message auth-message--error' role='alert'>
+            {error}{needsVerification && <> <Link to='/verify-email' state={{ email }}>Verify your email.</Link></>}
+          </p>
+        )}
         <button type='submit' className='auth-submit' disabled={submitting}>
           {submitting ? 'Signing in...' : 'Sign in'}
           {!submitting && <span aria-hidden='true'>→</span>}

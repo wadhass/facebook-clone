@@ -1,7 +1,7 @@
 import './firendReqe.css'
 import { Link } from 'react-router-dom'
 import { useCallback, useEffect, useState } from 'react'
-import { apiRequest } from '../../api'
+import { apiRequest, getMediaUrl } from '../../api'
 
 export default function FirendReqe  () {
   const [requests, setRequests] = useState([])
@@ -70,7 +70,7 @@ export default function FirendReqe  () {
             <Link to={`/profile/${request.user.id}`}>
             <div className='info'>
               <div className="user">
-                {request.user.avatar && <img src={request.user.avatar} alt="" />}
+                {request.user.avatar && <img src={getMediaUrl(request.user.avatar)} alt="" />}
                 <h5>{request.user.name}</h5>
               </div>
             </div>
@@ -87,7 +87,7 @@ export default function FirendReqe  () {
         <div className='request' key={person.id}>
           <Link to={`/profile/${person.id}`}>
             <div className='user'>
-              {person.avatar && <img src={person.avatar} alt="" />}
+              {person.avatar && <img src={getMediaUrl(person.avatar)} alt="" />}
               <h5>{person.name}</h5>
             </div>
           </Link>

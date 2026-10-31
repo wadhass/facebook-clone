@@ -2,6 +2,7 @@ services:
   - type: web
     name: qavero-frontend
     runtime: static
+    rootDir: frontend
     buildCommand: npm ci && npm run build
     staticPublishPath: ./dist
     autoDeployTrigger: commit

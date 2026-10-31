@@ -17,12 +17,12 @@ export default function Signup(){
     const form = new FormData(event.currentTarget)
 
     try {
-      await signUp({
+      const result = await signUp({
         name: form.get('name'),
         email: form.get('email'),
         password: form.get('password'),
       })
-      navigate('/')
+      navigate('/verify-email', { state: { email: result.email } })
     } catch (requestError) {
       setError(requestError.message)
     } finally {

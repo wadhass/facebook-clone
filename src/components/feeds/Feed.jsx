@@ -62,7 +62,7 @@ export default function Feed ({fed}) {
         <div className='top-content'>
             <Link to={`/profile/${post.author.id}`}>
             <div className="user">
-                {post.author.avatar && <img src={post.author.avatar} alt="" />}
+                {post.author.avatar && <img src={getMediaUrl(post.author.avatar)} alt="" />}
                 <div>
                 <h5>{post.author.name}</h5>
                 <small>{new Date(post.createdAt).toLocaleString()}</small>

@@ -30,6 +30,12 @@
     align-items: center;
     gap: 1rem;
 }
+.profile-avatar-upload {
+    cursor: pointer;
+}
+.profile-avatar-upload input {
+    display: none;
+}
 .bio{
     width: 80%;
     margin: 10px auto;

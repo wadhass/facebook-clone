@@ -2,6 +2,7 @@ import './comments.css'
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { useAuth } from '../../auth/useAuth'
+import { getMediaUrl } from '../../api'
 
 
 export default function Comments ({ comments, onComment }) {
@@ -29,7 +30,7 @@ export default function Comments ({ comments, onComment }) {
         <div className="writebox">
             <form onSubmit={handleSubmit}>
                 <div className="user">
-                    {user?.avatar && <img src={user.avatar} alt="" />}
+                    {user?.avatar && <img src={getMediaUrl(user.avatar)} alt="" />}
                     <input
                       type="text"
                       value={text}
@@ -48,7 +49,7 @@ export default function Comments ({ comments, onComment }) {
         {comments.map((comment) => (
             <Link to={`/profile/${comment.author.id}`} key={comment.id}>
               <div className="user">
-                {comment.author.avatar && <img src={comment.author.avatar} alt="" />}
+                {comment.author.avatar && <img src={getMediaUrl(comment.author.avatar)} alt="" />}
                 <div>
                   <h5>{comment.author.name}</h5>
                   <p>{comment.text}</p>

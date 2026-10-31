@@ -1,7 +1,12 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+const configuredApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+const apiUrl = new URL(
+  configuredApiUrl.includes('://') ? configuredApiUrl : `https://${configuredApiUrl}`,
+)
+if (apiUrl.pathname === '/') apiUrl.pathname = '/api'
+const API_URL = apiUrl.toString().replace(/\/$/, '')
 
 export function getMediaUrl(mediaUrl) {
-  return new URL(mediaUrl, new URL(API_URL, window.location.origin)).href
+  return new URL(mediaUrl, API_URL).href
 }
 
 export async function apiRequest(path, options = {}) {
