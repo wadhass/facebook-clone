@@ -98,13 +98,23 @@ small,p{
 
 main{
   display: grid;
-  grid-template-columns: 20% 54% 23%;
+  grid-template-columns: 20% minmax(0, 54%) 20%;
   gap: 3%;
   width: 100%;
 }
 @media (max-width:1024px){
   main{
-    grid-template-columns: 8% 56% 32%;
+  grid-template-columns: 8% minmax(0, 1fr) 28%;
+  gap: 2%;
+  }
+}
+@media (max-width:991px){
+  main{
+    grid-template-columns: minmax(0, 1fr);
+    padding-bottom: calc(4.25rem + env(safe-area-inset-bottom));
+  }
+  main > .container{
+    width: min(94%, 840px);
   }
 }
 @media (max-width:768px){

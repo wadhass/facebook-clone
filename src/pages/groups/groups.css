@@ -1,0 +1,313 @@
+.groups-page,
+.group-chat-page {
+  margin: 20px 0;
+  padding: 22px;
+  border-radius: 16px;
+  background: var(--color-card);
+}
+
+.groups-page > header {
+  margin-bottom: 24px;
+}
+
+.groups-eyebrow {
+  color: var(--color-primary);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+
+.groups-page > header h1 {
+  margin: 6px 0;
+  font-size: 1.8rem;
+}
+
+.groups-section,
+.groups-create {
+  padding: 18px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.groups-section h2,
+.groups-create h2 {
+  margin-bottom: 14px;
+  font-size: 1.1rem;
+}
+
+.groups-list {
+  display: grid;
+  gap: 10px;
+}
+
+.group-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  color: var(--text-color);
+}
+
+.group-icon,
+.group-friend-placeholder {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  place-items: center;
+  border-radius: 50%;
+  color: white;
+  background: var(--color-primary);
+  font-weight: 700;
+}
+
+.group-card-copy {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.group-card-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.groups-create > label,
+.groups-create fieldset {
+  display: block;
+  margin: 14px 0;
+}
+
+.groups-create > input {
+  width: 100%;
+  margin-top: 6px;
+  padding: 11px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  color: var(--text-color);
+  background: var(--color-bg);
+}
+
+.groups-create fieldset {
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.groups-create legend {
+  padding: 0 5px;
+  color: var(--text-color);
+}
+
+.group-friend-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.group-friend-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 9px;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.group-friend-option:hover {
+  background: var(--color-bg);
+}
+
+.group-friend-option img,
+.group-friend-placeholder {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.group-friend-placeholder {
+  font-size: .85rem;
+}
+
+.group-chat-page {
+  display: flex;
+  height: calc(100dvh - 5.2rem);
+  min-height: 500px;
+  flex-direction: column;
+}
+
+.group-chat-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.group-chat-header > a {
+  color: var(--color-primary);
+  font-size: 1.3rem;
+}
+
+.group-chat-header h1 {
+  font-size: 1.05rem;
+}
+
+.group-chat-header small {
+  display: block;
+  margin-top: 3px;
+}
+
+.group-chat-members {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.group-chat-members > span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  color: var(--color-soft);
+  font-size: .75rem;
+}
+
+.group-chat-members img {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+}
+
+.group-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 2px;
+}
+
+.group-chat-message {
+  display: grid;
+  width: fit-content;
+  max-width: min(80%, 520px);
+  gap: 5px;
+  margin: 8px 0;
+  padding: 10px 13px;
+  border-radius: 13px 13px 13px 3px;
+  background: var(--color-bg);
+  overflow-wrap: anywhere;
+}
+
+.group-chat-message.is-own {
+  margin-left: auto;
+  border-radius: 13px 13px 3px 13px;
+  color: white;
+  background: var(--color-primary);
+}
+
+.group-chat-message > small,
+.group-chat-message > time {
+  color: var(--color-soft);
+  font-size: .7rem;
+}
+
+.group-chat-message.is-own > small,
+.group-chat-message.is-own > time {
+  color: rgb(255 255 255 / 78%);
+}
+
+.group-chat-message > p {
+  color: inherit;
+}
+
+.group-chat-message > img,
+.group-chat-message > video {
+  width: min(100%, 360px);
+  max-height: 280px;
+  border-radius: 9px;
+  object-fit: contain;
+}
+
+.group-chat-message > a {
+  color: var(--color-primary);
+}
+
+.group-typing {
+  min-height: 18px;
+  font-size: .78rem;
+}
+
+.group-chat-composer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 14px;
+  background: var(--color-bg);
+}
+
+.group-chat-composer > input[type='text'],
+.group-chat-composer > input:not([type]) {
+  width: 100%;
+  min-width: 0;
+  color: var(--text-color);
+  background: transparent;
+}
+
+.group-chat-composer > .group-attach-button {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-primary);
+  background: var(--color-card);
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.group-attach-button input {
+  display: none;
+}
+
+.group-attachment-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.group-attachment-preview img {
+  width: 60px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.group-attachment-preview button {
+  color: var(--color-red);
+  background: transparent;
+  cursor: pointer;
+}
+
+@media (max-width: 540px) {
+  .groups-page,
+  .group-chat-page {
+    padding: 14px;
+  }
+
+  .group-chat-page {
+    height: calc(100dvh - 8.75rem);
+    min-height: min(380px, calc(100dvh - 9rem));
+  }
+
+  .group-chat-composer .btn {
+    padding: .6rem .8rem;
+  }
+}

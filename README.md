@@ -2,13 +2,13 @@
 
 ## Social network API
 
-The React app uses the API in the sibling `backend` folder for accounts, posts, likes, comments, expiring stories, friend discovery and requests, profiles, and direct messages.
+The React app uses the API in the sibling `backend` folder for accounts, posts, likes, comments, expiring stories, friend discovery and requests, profiles, independent followers, direct and group messages, and notifications. Authenticated pages connect to the backend with Socket.IO for live message delivery, typing indicators, delivery/read receipts, and notification updates.
 
 1. Start MongoDB locally or create a MongoDB Atlas database.
 2. In `backend`, copy `.env.example` to `.env`, set `MONGODB_URI`, and set `JWT_SECRET` to a unique value of at least 32 characters. Run `npm install` and `npm run dev`.
 3. In `frontend`, run `npm install` and `npm run dev`. The default API URL is `http://localhost:5000/api`; set `VITE_API_URL` in a local `.env` file if needed.
 
-Create an account from the signup page. Passwords are hashed before storage and protected API routes require a signed-in account. Posts and stories support one uploaded photo or video each (up to 50 MB), stored by the backend in `backend/uploads`. Stories are shared with friends and expire after 24 hours. Conversations refresh every five seconds while open. For production, configure durable media storage and deployment infrastructure rather than relying on local disk. Post sharing and instant push-based message delivery are not included.
+Create an account from the signup page. Passwords are hashed before storage and protected API routes require a signed-in account. Posts and stories support one uploaded photo or video each (up to 50 MB), stored by the backend in `backend/uploads`. Stories are shared with friends and expire after 24 hours. Direct and group conversations load through REST and receive new messages over Socket.IO; message attachments and recorded voice notes use private backend storage. One-to-one audio/video calls use browser WebRTC and require a secure HTTPS origin plus camera/microphone permission. Group calls and browser push notifications are not included yet. The interface adapts to phone, tablet, and desktop-sized screens. For production, configure durable media storage and deployment infrastructure rather than relying on local disk.
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

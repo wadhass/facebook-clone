@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { apiRequest } from '../../api'
 import AuthLayout from '../../components/auth/AuthLayout'
 import PasswordInput from '../../components/auth/PasswordInput'
@@ -7,10 +7,32 @@ import PasswordInput from '../../components/auth/PasswordInput'
 export default function ResetPassword() {
   const { token: routeToken } = useParams()
   const [searchParams] = useSearchParams()
+  const location = useLocation()
   const navigate = useNavigate()
+  const [email, setEmail] = useState(location.state?.email ?? '')
   const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const token = routeToken ?? searchParams.get('token')
+
+  async function handleRequestReset(event) {
+    event.preventDefault()
+    setError('')
+    setMessage('')
+    setSubmitting(true)
+
+    try {
+      const result = await apiRequest('/auth/forgot-password', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      })
+      setMessage(result.message)
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -40,16 +62,16 @@ export default function ResetPassword() {
 
   return (
     <AuthLayout
-      eyebrow='CHOOSE A NEW PASSWORD'
-      title='You’re back in control.'
-      description='Choose a strong new password you haven’t used on Qavero before.'
-      footer={<>Need a fresh link? <Link to='/forgot-password'>Request another</Link></>}
+      eyebrow={token ? 'CHOOSE A NEW PASSWORD' : 'ACCOUNT RECOVERY'}
+      title={token ? 'You’re back in control.' : 'Reset your password.'}
+      description={token
+        ? 'Choose a strong new password you haven’t used on Qavero before.'
+        : 'Enter the email linked to your account and we’ll send you a secure reset link.'}
+      footer={token
+        ? <>Need a fresh link? <Link to='/reset-password'>Request another</Link></>
+        : <>Remembered it? <Link to='/login'>Back to sign in</Link></>}
     >
-      {!token ? (
-        <p className='auth-message auth-message--error' role='alert'>
-          This reset link is missing or incomplete. <Link to='/forgot-password'>Request a new one</Link>.
-        </p>
-      ) : (
+      {token ? (
         <form className='auth-form' onSubmit={handleSubmit}>
           <PasswordInput
             id='reset-password'
@@ -71,6 +93,29 @@ export default function ResetPassword() {
           {error && <p className='auth-message auth-message--error' role='alert'>{error}</p>}
           <button type='submit' className='auth-submit' disabled={submitting}>
             {submitting ? 'Updating password...' : 'Reset password'}
+            {!submitting && <span aria-hidden='true'>→</span>}
+          </button>
+        </form>
+      ) : (
+        <form className='auth-form' onSubmit={handleRequestReset}>
+          <div className='auth-field'>
+            <label htmlFor='recovery-email'>Email address</label>
+            <input
+              className='auth-input'
+              id='recovery-email'
+              name='email'
+              type='email'
+              required
+              placeholder='you@example.com'
+              autoComplete='email'
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+          </div>
+          {error && <p className='auth-message auth-message--error' role='alert'>{error}</p>}
+          {message && <p className='auth-message auth-message--success' role='status'>{message}</p>}
+          <button type='submit' className='auth-submit' disabled={submitting}>
+            {submitting ? 'Sending link...' : 'Send reset link'}
             {!submitting && <span aria-hidden='true'>→</span>}
           </button>
         </form>

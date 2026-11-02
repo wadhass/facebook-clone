@@ -3,13 +3,14 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { getMediaUrl } from '../../api'
+import NotificationsMenu from '../notifications/NotificationsMenu'
 
 // Components.........
 import DarkMoode from '../darkmod/DarkMoode';
 
 // fontAwesome Icon
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBell, faEnvelope, faHome, faSearch, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faEnvelope, faHome, faSearch, faUser } from '@fortawesome/free-solid-svg-icons';
 
 export default function Nav  () {
   const { user, signOut } = useAuth()
@@ -63,9 +64,7 @@ export default function Nav  () {
           <Link to='/friends' aria-label='Messages' title='Messages'>
             <FontAwesomeIcon icon={faEnvelope}/>
           </Link>
-          <Link to='/friends?tab=requests' aria-label='Friend requests' title='Friend requests'>
-          <FontAwesomeIcon icon={faBell}/>
-          </Link>
+          <NotificationsMenu />
           <DarkMoode />
           <div className="user">
             {user?.avatar && <img src={getMediaUrl(user.avatar)} alt="" />}

@@ -65,7 +65,7 @@ export default function Login() {
           autoComplete='current-password'
         />
         <div className='auth-form-options'>
-          <Link to='/forgot-password'>Forgot password?</Link>
+          <Link to='/reset-password' state={{ email }}>Forgot password?</Link>
         </div>
         {error && (
           <p className='auth-message auth-message--error' role='alert'>

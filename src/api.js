@@ -5,6 +5,10 @@ const apiUrl = new URL(
 if (apiUrl.pathname === '/') apiUrl.pathname = '/api'
 const API_URL = apiUrl.toString().replace(/\/$/, '')
 
+export function getRealtimeUrl() {
+  return new URL(API_URL).origin
+}
+
 export function getMediaUrl(mediaUrl) {
   return new URL(mediaUrl, API_URL).href
 }

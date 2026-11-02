@@ -15,6 +15,7 @@ export default function UserProfile () {
   const [profile, setProfile] = useState(null)
   const [error, setError] = useState('')
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [updatingFollow, setUpdatingFollow] = useState(false)
   const [friendStatus, setFriendStatus] = useState('none')
   const [requestId, setRequestId] = useState(null)
   const isSelf = currentUser?.id === id
@@ -25,7 +26,13 @@ export default function UserProfile () {
     setError('')
     apiRequest(`/users/${id}`)
       .then((data) => {
-        setProfile(data.user)
+        setProfile({
+          ...data.user,
+          friendCount: data.friendCount,
+          followersCount: data.followersCount,
+          followingCount: data.followingCount,
+          isFollowing: data.isFollowing,
+        })
         setFriendStatus(data.friendStatus)
         setRequestId(data.requestId)
       })
@@ -61,6 +68,25 @@ export default function UserProfile () {
       window.dispatchEvent(new Event('friends:updated'))
     } catch (requestError) {
       setError(requestError.message)
+    }
+  }
+
+  async function toggleFollow() {
+    setError('')
+    setUpdatingFollow(true)
+    try {
+      const result = await apiRequest(`/follows/${id}`, {
+        method: profile.isFollowing ? 'DELETE' : 'POST',
+      })
+      setProfile((currentProfile) => ({
+        ...currentProfile,
+        isFollowing: result.following,
+        followersCount: result.followersCount,
+      }))
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setUpdatingFollow(false)
     }
   }
 
@@ -102,6 +128,15 @@ export default function UserProfile () {
             <div className="user-name">
                 <h3>{profile.name}</h3>
             </div>
+            <div className='profile-stats' aria-label='Profile connections'>
+                <div><strong>{profile.friendCount}</strong><span>Friends</span></div>
+                <Link to={`/connections/${id}?tab=followers`}>
+                    <strong>{profile.followersCount}</strong><span>Followers</span>
+                </Link>
+                <Link to={`/connections/${id}?tab=following`}>
+                    <strong>{profile.followingCount}</strong><span>Following</span>
+                </Link>
+            </div>
             {error && <p role='alert'>{error}</p>}
             <div className="profile-button">
                 {isSelf && (
@@ -127,6 +162,16 @@ export default function UserProfile () {
                 {!isSelf && friendStatus === 'none' && (
                   <button className='btn btn-primary' onClick={addFriend}>
                     <FontAwesomeIcon icon={faFeed}/> Add friend
+                  </button>
+                )}
+                {!isSelf && (
+                  <button
+                    type='button'
+                    className={profile.isFollowing ? 'btn btn-red' : 'btn btn-primary'}
+                    onClick={toggleFollow}
+                    disabled={updatingFollow}
+                  >
+                    {updatingFollow ? 'Updating...' : profile.isFollowing ? 'Unfollow' : 'Follow'}
                   </button>
                 )}
                 {friendStatus === 'pending-sent' && (
