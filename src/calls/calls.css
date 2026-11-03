@@ -3,41 +3,81 @@
   inset: 0;
   z-index: 100;
   display: grid;
-  padding: 18px;
   place-items: center;
-  background: rgb(9 13 27 / 62%);
-  backdrop-filter: blur(7px);
+  padding: 18px;
+  background: rgba(8, 12, 20, 0.58);
+  backdrop-filter: blur(8px);
 }
 
 .call-overlay {
   position: relative;
   display: flex;
-  width: min(440px, 100%);
-  min-height: 390px;
+  width: min(380px, 100%);
+  min-height: min(720px, calc(100dvh - 36px));
   align-items: center;
   flex-direction: column;
-  justify-content: center;
-  gap: 18px;
+  justify-content: flex-end;
   overflow: hidden;
-  padding: 28px;
-  border: 1px solid rgb(255 255 255 / 12%);
-  border-radius: 24px;
+  padding: 18px 18px 26px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 32px;
   color: white;
-  background: #171b2c;
-  box-shadow: 0 25px 90px rgb(0 0 0 / 35%);
+  background: linear-gradient(180deg, rgba(18, 21, 32, 0.92), rgba(16, 18, 28, 0.98));
+  box-shadow: 0 35px 90px rgba(0, 0, 0, 0.45);
 }
 
 .call-overlay.is-video {
-  width: min(860px, 100%);
-  min-height: min(680px, calc(100dvh - 36px));
-  justify-content: flex-end;
-  padding: 20px;
+  width: min(390px, 100%);
+  min-height: min(760px, calc(100dvh - 24px));
+  padding: 16px 16px 24px;
+}
+
+.call-topbar {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.call-top-button {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  color: white;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 1.6rem;
+  font-weight: 300;
+  cursor: pointer;
+}
+
+.call-top-button--camera {
+  font-size: 1rem;
+}
+
+.call-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 94px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .call-video-stage {
   position: absolute;
   inset: 0;
-  background: #0b0d13;
+  background: linear-gradient(180deg, #111827, #0f172a 40%, #090d17);
 }
 
 .call-video-stage > video:first-child {
@@ -48,14 +88,15 @@
 
 .call-video-stage > video:nth-child(2) {
   position: absolute;
-  right: 18px;
-  bottom: 18px;
-  width: min(24%, 180px);
-  aspect-ratio: 3 / 4;
-  border: 2px solid rgb(255 255 255 / 68%);
-  border-radius: 14px;
-  background: #262a37;
+  right: 14px;
+  bottom: 120px;
+  width: 110px;
+  height: 148px;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
   object-fit: cover;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.32);
 }
 
 .call-video-stage > audio {
@@ -66,15 +107,17 @@
   position: relative;
   z-index: 1;
   display: grid;
-  width: 100px;
-  height: 100px;
+  width: 170px;
+  height: 170px;
+  margin-bottom: 18px;
   place-items: center;
   overflow: hidden;
-  border: 3px solid rgb(255 255 255 / 32%);
+  border: 3px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #2563eb);
+  box-shadow: 0 24px 70px rgba(37, 99, 235, 0.35);
   color: white;
-  background: #6c63ff;
-  font-size: 2rem;
+  font-size: 3.5rem;
   font-weight: 700;
 }
 
@@ -87,81 +130,102 @@
 .call-details {
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
   text-align: center;
 }
 
 .call-details h2 {
+  margin: 0;
   color: white;
-  font-size: 1.3rem;
+  font-size: clamp(1.7rem, 2vw, 2.3rem);
+  font-weight: 700;
 }
 
 .call-details p {
-  margin-top: 6px;
-  color: rgb(255 255 255 / 70%);
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.98rem;
 }
 
 .call-overlay.is-video .call-details {
-  align-self: flex-start;
-  margin-right: auto;
-  padding: 10px 14px;
-  border-radius: 12px;
-  background: rgb(0 0 0 / 48%);
+  position: absolute;
+  top: 62px;
+  left: 18px;
+  right: 18px;
+  z-index: 2;
+  align-items: flex-start;
+  text-align: left;
+  padding: 0 8px;
+}
+
+.call-overlay.is-video .call-details h2 {
+  font-size: 1.5rem;
+}
+
+.call-overlay.is-video .call-details p {
+  color: rgba(255, 255, 255, 0.76);
 }
 
 .call-actions {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 10px;
+  gap: 14px;
+  margin-top: 18px;
+  padding-bottom: 4px;
 }
 
 .call-action {
   display: grid;
-  min-width: 62px;
-  min-height: 62px;
-  justify-items: center;
-  align-content: center;
-  gap: 5px;
-  padding: 9px;
-  border-radius: 18px;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  gap: 4px;
+  padding: 8px;
+  border: 0;
+  border-radius: 50%;
   color: white;
-  background: #303548;
+  background: rgba(255, 255, 255, 0.12);
   cursor: pointer;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
 }
 
 .call-action svg {
-  font-size: 1.05rem;
+  font-size: 1.15rem;
 }
 
 .call-action span {
-  font-size: .68rem;
+  display: none;
 }
 
 .call-action.is-active {
-  background: #4a5064;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .call-action--decline {
-  background: #dc4058;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
 }
 
 .call-action--accept {
-  background: #2ba976;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
 }
 
 .call-action:disabled {
-  opacity: .5;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .call-inline-error {
   position: relative;
   z-index: 1;
-  color: #ffb6c0;
+  margin-top: 10px;
+  color: #fed7d7;
   text-align: center;
 }
 
@@ -178,7 +242,7 @@
   border-radius: 12px;
   color: white;
   background: #b83249;
-  box-shadow: 0 12px 40px rgb(0 0 0 / 25%);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
 }
 
 .call-error-toast button {
@@ -190,19 +254,27 @@
 
 @media (max-width: 480px) {
   .call-overlay-backdrop {
-    padding: 10px;
+    padding: 8px;
   }
 
   .call-overlay,
   .call-overlay.is-video {
-    min-height: min(360px, calc(100dvh - 20px));
-    padding: 18px;
-    border-radius: 18px;
+    width: min(100%, 390px);
+    min-height: min(640px, calc(100dvh - 12px));
+    border-radius: 26px;
+  }
+
+  .call-avatar {
+    width: 145px;
+    height: 145px;
+  }
+
+  .call-topbar {
+    top: 12px;
   }
 
   .call-action {
-    min-width: 56px;
-    min-height: 56px;
-    padding: 7px;
+    width: 52px;
+    height: 52px;
   }
 }

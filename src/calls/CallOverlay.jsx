@@ -96,6 +96,12 @@ export default function CallOverlay() {
   return (
     <div className='call-overlay-backdrop'>
       <section className={`call-overlay${call.kind === 'video' ? ' is-video' : ''}`} role='dialog' aria-modal='true' aria-label={`${call.kind} call`}>
+        <div className='call-topbar'>
+          <button type='button' className='call-top-button' aria-label='Back'>‹</button>
+          <span className='call-status-pill'>{call.kind === 'video' ? 'Video' : 'Voice'}</span>
+          <button type='button' className='call-top-button call-top-button--camera' aria-label='Camera options'>◉</button>
+        </div>
+
         {call.kind === 'video' && call.status !== 'incoming' && (
           <div className='call-video-stage'>
             <video ref={remoteVideoRef} autoPlay playsInline aria-label='Remote video' />

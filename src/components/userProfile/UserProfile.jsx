@@ -18,7 +18,10 @@ export default function UserProfile () {
   const [updatingFollow, setUpdatingFollow] = useState(false)
   const [friendStatus, setFriendStatus] = useState('none')
   const [requestId, setRequestId] = useState(null)
-  const isSelf = currentUser?.id === id
+  const normalizedProfileId = String(profile?.id ?? id ?? '').toLowerCase()
+  const normalizedCurrentUserId = String(currentUser?.id ?? currentUser?._id ?? '').toLowerCase()
+  const isSelf = Boolean(normalizedProfileId && normalizedCurrentUserId)
+    && normalizedProfileId === normalizedCurrentUserId
   const MAX_AVATAR_SIZE = 5 * 1024 * 1024
 
   useEffect(() => {
@@ -40,6 +43,7 @@ export default function UserProfile () {
   }, [id])
 
   async function addFriend() {
+    if (isSelf) return
     try {
       const { status } = await apiRequest(`/friends/${id}`, { method: 'POST' })
       setFriendStatus(status === 'accepted' ? 'friends' : 'pending-sent')
@@ -72,6 +76,7 @@ export default function UserProfile () {
   }
 
   async function toggleFollow() {
+    if (isSelf || updatingFollow) return
     setError('')
     setUpdatingFollow(true)
     try {
@@ -159,6 +164,11 @@ export default function UserProfile () {
                     <button className='btn btn-red' onClick={removeFriendship}>Remove friend</button>
                   </>
                 )}
+                {!isSelf && friendStatus !== 'none' && friendStatus !== 'friends' && (
+                  <Link to={`/chatbox/${id}`} className='btn btn-primary'>
+                    <FontAwesomeIcon icon={faMessage}/> Message
+                  </Link>
+                )}
                 {!isSelf && friendStatus === 'none' && (
                   <button className='btn btn-primary' onClick={addFriend}>
                     <FontAwesomeIcon icon={faFeed}/> Add friend
@@ -174,10 +184,10 @@ export default function UserProfile () {
                     {updatingFollow ? 'Updating...' : profile.isFollowing ? 'Unfollow' : 'Follow'}
                   </button>
                 )}
-                {friendStatus === 'pending-sent' && (
+                {!isSelf && friendStatus === 'pending-sent' && (
                   <button className='btn btn-red' onClick={removeFriendship}>Cancel request</button>
                 )}
-                {friendStatus === 'pending-received' && (
+                {!isSelf && friendStatus === 'pending-received' && (
                   <>
                     <button className='btn btn-primary' onClick={acceptRequest}>Accept request</button>
                     <button className='btn btn-red' onClick={removeFriendship}>Decline</button>

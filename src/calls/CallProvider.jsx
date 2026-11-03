@@ -204,6 +204,7 @@ export function CallProvider({ children }) {
   }, [releaseMedia])
 
   const startCall = useCallback(async (peer, kind) => {
+    if (!peer || !peer.id) throw new Error('Select a valid friend before starting a call')
     if (!socket?.connected) throw new Error('The call service is not connected')
     if (callRef.current) throw new Error('End your current call before starting another')
     if (!['audio', 'video'].includes(kind)) throw new Error('Choose an audio or video call')

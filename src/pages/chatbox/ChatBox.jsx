@@ -28,6 +28,7 @@ export default function ChatBox () {
   const { socket } = useRealtime()
   const { startCall, call: activeCall } = useCalls()
   const [friend, setFriend] = useState(null)
+  const [canCall, setCanCall] = useState(false)
   const [messages, setMessages] = useState([])
   const [callHistory, setCallHistory] = useState([])
   const [text, setText] = useState('')
@@ -62,14 +63,24 @@ export default function ChatBox () {
   }, [])
 
   const loadMessages = useCallback(async () => {
+    if (!friendId || !/^[a-f\d]{24}$/i.test(friendId)) {
+      setFriend(null)
+      setMessages([])
+      setCallHistory([])
+      setError('Invalid user id')
+      return
+    }
+
     try {
-      const [{ messages: conversation }, { friends }, { calls }] = await Promise.all([
+      const [{ messages: conversation }, { friends }, { calls }, { user: chatUser, friendStatus }] = await Promise.all([
         apiRequest(`/messages/${friendId}`),
         apiRequest('/friends'),
         apiRequest('/calls'),
+        apiRequest(`/users/${friendId}`),
       ])
       setMessages((current) => mergeMessages(current, conversation))
-      setFriend(friends.find((person) => person.id === friendId) ?? null)
+      setFriend(friends.find((person) => person.id === friendId) ?? chatUser)
+      setCanCall(friendStatus === 'friends')
       setCallHistory(calls.filter((call) => (
         call.caller?.id === friendId || call.recipient?.id === friendId
       )))
@@ -81,6 +92,7 @@ export default function ChatBox () {
 
   useEffect(() => {
     setFriend(null)
+    setCanCall(false)
     setMessages([])
     loadMessages()
   }, [loadMessages])
@@ -148,6 +160,8 @@ export default function ChatBox () {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, callHistory])
 
+  const hasValidChatTarget = Boolean(friendId && friendId !== 'undefined' && friendId !== 'null')
+
   const timeline = useMemo(() => [
     ...messages,
     ...callHistory.map((call) => ({
@@ -161,23 +175,48 @@ export default function ChatBox () {
     messages,
   ])
 
-  async function sendMessage(event) {
-    event.preventDefault()
+  async function sendMediaMessage(nextMedia, nextText = '') {
+    if (!nextMedia?.file || !friendId || !/^[a-f\d]{24}$/i.test(friendId)) {
+      setError('Select a valid friend before sending a message')
+      return
+    }
     setError('')
     setSending(true)
     try {
-      const body = media
-        ? (() => {
-            const formData = new FormData()
-            formData.append('text', text)
-            formData.append('media', media.file)
-            return formData
-          })()
-        : JSON.stringify({ text })
-      const { message } = await apiRequest(`/messages/${friendId}`, { method: 'POST', body })
+      const formData = new FormData()
+      formData.append('text', nextText)
+      formData.append('media', nextMedia.file)
+      const { message } = await apiRequest(`/messages/${friendId}`, { method: 'POST', body: formData })
       setMessages((current) => mergeMessages(current, [message]))
       setText('')
       setMedia(null)
+      socket?.emit('typing', { recipientId: friendId, active: false })
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setSending(false)
+    }
+  }
+
+  async function sendMessage(event) {
+    event.preventDefault()
+    if (!friendId || !/^[a-f\d]{24}$/i.test(friendId)) {
+      setError('Select a valid friend before sending a message')
+      return
+    }
+    if (media) {
+      await sendMediaMessage(media, text)
+      return
+    }
+    setError('')
+    setSending(true)
+    try {
+      const { message } = await apiRequest(`/messages/${friendId}`, {
+        method: 'POST',
+        body: JSON.stringify({ text }),
+      })
+      setMessages((current) => mergeMessages(current, [message]))
+      setText('')
       socket?.emit('typing', { recipientId: friendId, active: false })
     } catch (requestError) {
       setError(requestError.message)
@@ -240,7 +279,9 @@ export default function ChatBox () {
           setError('Voice messages must be 50 MB or smaller')
           return
         }
-        setMedia({ file, previewUrl: URL.createObjectURL(file) })
+        const nextMedia = { file, previewUrl: URL.createObjectURL(file) }
+        setMedia(nextMedia)
+        void sendMediaMessage(nextMedia)
       }
       recorder.start()
       setRecording(true)
@@ -262,6 +303,10 @@ export default function ChatBox () {
   }
 
   async function beginCall(kind) {
+    if (!friend || !friend.id || !canCall) {
+      setError('Calls are available after the friend request is accepted')
+      return
+    }
     setError('')
     try {
       await startCall(friend, kind)
@@ -271,6 +316,10 @@ export default function ChatBox () {
   }
 
   async function sendSticker(sticker) {
+    if (!friendId || !/^[a-f\d]{24}$/i.test(friendId)) {
+      setError('Select a valid friend before sending a message')
+      return
+    }
     setOpenPicker(null)
     setError('')
     setSending(true)
@@ -319,24 +368,28 @@ export default function ChatBox () {
       </div>
       {friend && (
         <div className='chat-header-actions'>
-          <button
-            type='button'
-            aria-label='Start audio call'
-            title='Audio call'
-            disabled={Boolean(activeCall)}
-            onClick={() => beginCall('audio')}
-          >
-            <FontAwesomeIcon icon={faPhone} />
-          </button>
-          <button
-            type='button'
-            aria-label='Start video call'
-            title='Video call'
-            disabled={Boolean(activeCall)}
-            onClick={() => beginCall('video')}
-          >
-            <FontAwesomeIcon icon={faVideo} />
-          </button>
+          {canCall && (
+            <>
+              <button
+                type='button'
+                aria-label='Start audio call'
+                title='Audio call'
+                disabled={Boolean(activeCall)}
+                onClick={() => beginCall('audio')}
+              >
+                <FontAwesomeIcon icon={faPhone} />
+              </button>
+              <button
+                type='button'
+                aria-label='Start video call'
+                title='Video call'
+                disabled={Boolean(activeCall)}
+                onClick={() => beginCall('video')}
+              >
+                <FontAwesomeIcon icon={faVideo} />
+              </button>
+            </>
+          )}
           <Link to={`/profile/${friend.id}`} aria-label='View profile details' title='Profile details'>
             <span aria-hidden='true'>ⓘ</span>
           </Link>
@@ -427,6 +480,7 @@ export default function ChatBox () {
           <input
             type='file'
             accept='image/*'
+            capture='environment'
             onChange={chooseAttachment}
             aria-label='Take or upload a photo'
           />
@@ -452,6 +506,30 @@ export default function ChatBox () {
         >
           <FontAwesomeIcon icon={faMicrophone} />
         </button>
+      )}
+      {hasValidChatTarget && canCall && (
+        <div className='chat-call-buttons'>
+          <button
+            type='button'
+            className='chat-call-button chat-call-button--audio'
+            aria-label='Start audio call'
+            title='Audio call'
+            disabled={Boolean(activeCall) || !friend}
+            onClick={() => beginCall('audio')}
+          >
+            <FontAwesomeIcon icon={faPhone} />
+          </button>
+          <button
+            type='button'
+            className='chat-call-button chat-call-button--video'
+            aria-label='Start video call'
+            title='Video call'
+            disabled={Boolean(activeCall) || !friend}
+            onClick={() => beginCall('video')}
+          >
+            <FontAwesomeIcon icon={faVideo} />
+          </button>
+        </div>
       )}
       <form onSubmit={sendMessage}>
         <input

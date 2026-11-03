@@ -62,13 +62,20 @@ export default function Friends() {
     }
   }
 
+  const validFriends = (Array.isArray(data.friends) ? data.friends : []).filter((friend) => friend && friend.id)
+  const validIncoming = (Array.isArray(data.incoming) ? data.incoming : []).filter((request) => request && request.id && request.user && request.user.id)
+  const validOutgoing = (Array.isArray(data.outgoing) ? data.outgoing : []).filter((request) => request && request.id && request.user && request.user.id)
+
   const connectedIds = new Set([
-    ...data.friends.map((friend) => friend.id),
-    ...data.incoming.map((request) => request.user.id),
-    ...data.outgoing.map((request) => request.user.id),
+    ...validFriends.map((friend) => friend.id),
+    ...validIncoming.map((request) => request.user.id),
+    ...validOutgoing.map((request) => request.user.id),
   ])
-  const filteredFriends = data.friends.filter((friend) => (
-    friend.name.toLowerCase().includes(search.trim().toLowerCase())
+  const filteredFriends = validFriends.filter((friend) => (
+    friend.name?.toLowerCase().includes(search.trim().toLowerCase())
+  ))
+  const filteredSuggestions = suggestions.filter((person) => (
+    person && person.id && !connectedIds.has(person.id)
   ))
 
   return (
@@ -104,7 +111,7 @@ export default function Friends() {
             key={tab}
             onClick={() => chooseTab(tab)}
           >
-            {tab === 'requests' ? `Requests (${data.incoming.length})` : (
+            {tab === 'requests' ? `Requests (${validIncoming.length + validOutgoing.length})` : (
               tab[0].toUpperCase() + tab.slice(1)
             )}
           </button>
@@ -118,7 +125,9 @@ export default function Friends() {
           {filteredFriends.map((friend) => (
             <article className='friend-card' key={friend.id}>
               <Link to={`/profile/${friend.id}`} className='user'>
-                {friend.avatar && <img src={getMediaUrl(friend.avatar)} alt='' />}
+                {friend.avatar
+                  ? <img src={getMediaUrl(friend.avatar)} alt='' />
+                  : <span className='friend-avatar-fallback' aria-hidden='true'>{friend.name?.[0] ?? '?'}</span>}
                 <h3>{friend.name}</h3>
               </Link>
               <Link className='btn btn-primary' to={`/chatbox/${friend.id}`}>
@@ -132,46 +141,60 @@ export default function Friends() {
 
       {activeTab === 'requests' && (
         <div className='friends-list'>
-          {data.incoming.map((request) => (
-            <article className='friend-card' key={request.id}>
-              <Link to={`/profile/${request.user.id}`} className='user'>
-                {request.user.avatar && <img src={getMediaUrl(request.user.avatar)} alt='' />}
-                <h3>{request.user.name}</h3>
-              </Link>
-              <div className='friend-actions'>
-                <button
-                  type='button'
-                  className='btn btn-primary'
-                  onClick={() => performFriendAction(`/friends/${request.id}/accept`, 'PATCH')}
-                >
-                  Accept
-                </button>
-                <button
-                  type='button'
-                  className='btn btn-red'
-                  onClick={() => performFriendAction(`/friends/${request.id}`, 'DELETE')}
-                >
-                  Decline
-                </button>
-              </div>
-            </article>
-          ))}
-          {data.outgoing.map((request) => (
-            <article className='friend-card' key={request.id}>
-              <Link to={`/profile/${request.user.id}`} className='user'>
-                {request.user.avatar && <img src={getMediaUrl(request.user.avatar)} alt='' />}
-                <h3>{request.user.name}</h3>
-              </Link>
-              <button
-                type='button'
-                className='btn btn-red'
-                onClick={() => performFriendAction(`/friends/${request.id}`, 'DELETE')}
-              >
-                Cancel request
-              </button>
-            </article>
-          ))}
-          {!data.incoming.length && !data.outgoing.length && (
+          {validIncoming.length > 0 && (
+            <section className='friend-request-section' aria-labelledby='received-requests-heading'>
+              <h2 id='received-requests-heading'>Received <span>{validIncoming.length}</span></h2>
+              {validIncoming.map((request) => (
+                <article className='friend-card' key={request.id}>
+                  <Link to={`/profile/${request.user.id}`} className='user'>
+                    {request.user.avatar
+                      ? <img src={getMediaUrl(request.user.avatar)} alt='' />
+                      : <span className='friend-avatar-fallback' aria-hidden='true'>{request.user.name?.[0] ?? '?'}</span>}
+                    <h3>{request.user.name}</h3>
+                  </Link>
+                  <div className='friend-actions'>
+                    <button
+                      type='button'
+                      className='btn btn-primary'
+                      onClick={() => performFriendAction(`/friends/${request.id}/accept`, 'PATCH')}
+                    >
+                      Accept
+                    </button>
+                    <button
+                      type='button'
+                      className='btn btn-red'
+                      onClick={() => performFriendAction(`/friends/${request.id}`, 'DELETE')}
+                    >
+                      Decline
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </section>
+          )}
+          {validOutgoing.length > 0 && (
+            <section className='friend-request-section' aria-labelledby='sent-requests-heading'>
+              <h2 id='sent-requests-heading'>Sent <span>{validOutgoing.length}</span></h2>
+              {validOutgoing.map((request) => (
+                <article className='friend-card' key={request.id}>
+                  <Link to={`/profile/${request.user.id}`} className='user'>
+                    {request.user.avatar
+                      ? <img src={getMediaUrl(request.user.avatar)} alt='' />
+                      : <span className='friend-avatar-fallback' aria-hidden='true'>{request.user.name?.[0] ?? '?'}</span>}
+                    <h3>{request.user.name}</h3>
+                  </Link>
+                  <button
+                    type='button'
+                    className='btn btn-red'
+                    onClick={() => performFriendAction(`/friends/${request.id}`, 'DELETE')}
+                  >
+                    Cancel request
+                  </button>
+                </article>
+              ))}
+            </section>
+          )}
+          {!validIncoming.length && !validOutgoing.length && (
             <p>You have no pending friend requests.</p>
           )}
         </div>
@@ -179,10 +202,12 @@ export default function Friends() {
 
       {activeTab === 'discover' && (
         <div className='friends-list'>
-          {suggestions.filter((person) => !connectedIds.has(person.id)).map((person) => (
+          {filteredSuggestions.map((person) => (
             <article className='friend-card' key={person.id}>
               <Link to={`/profile/${person.id}`} className='user'>
-                {person.avatar && <img src={getMediaUrl(person.avatar)} alt='' />}
+                {person.avatar
+                  ? <img src={getMediaUrl(person.avatar)} alt='' />
+                  : <span className='friend-avatar-fallback' aria-hidden='true'>{person.name?.[0] ?? '?'}</span>}
                 <h3>{person.name}</h3>
               </Link>
               <button
@@ -194,7 +219,7 @@ export default function Friends() {
               </button>
             </article>
           ))}
-          {!suggestions.filter((person) => !connectedIds.has(person.id)).length && (
+          {!filteredSuggestions.length && (
             <p>No people found. Try a different name.</p>
           )}
         </div>

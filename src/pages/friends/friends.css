@@ -58,6 +58,29 @@
   gap: 10px;
 }
 
+.friend-request-section {
+  display: grid;
+  gap: 10px;
+}
+
+.friend-request-section + .friend-request-section {
+  margin-top: 12px;
+}
+
+.friend-request-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 2px;
+  font-size: 1rem;
+}
+
+.friend-request-section h2 span {
+  color: var(--color-soft);
+  font-size: .85rem;
+  font-weight: 500;
+}
+
 .friend-card {
   display: flex;
   align-items: center;
@@ -71,15 +94,38 @@
 .friend-card .user {
   min-width: 0;
   color: var(--text-color);
+  text-decoration: none;
 }
 
 .friend-card .user h3 {
+  overflow-wrap: anywhere;
   font-size: 1rem;
 }
 
-.friend-card .user img {
+.friend-card .user img,
+.friend-avatar-fallback {
   width: 44px;
   height: 44px;
+  flex: 0 0 44px;
+  border-radius: 50%;
+}
+
+.friend-avatar-fallback {
+  display: grid;
+  place-items: center;
+  color: white;
+  background: var(--color-primary);
+  font-weight: 700;
+}
+
+.friend-actions {
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.friend-card > .btn {
+  flex: 0 0 auto;
 }
 
 @media (max-width: 540px) {
@@ -93,7 +139,21 @@
   }
 
   .friend-card {
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .friend-card .user h3 {
+    font-size: .92rem;
+  }
+
+  .friend-card .btn {
+    padding: .55rem .8rem;
+    font-size: .82rem;
+  }
+
+  .friend-actions {
+    gap: 6px;
   }
 }

@@ -27,6 +27,11 @@ export default function Message () {
     return () => window.removeEventListener('friends:updated', loadFriends)
   }, [loadFriends])
 
+  const validFriends = (friends || []).filter((friend) => friend && friend.id && typeof friend.name === 'string')
+  const filteredFriends = validFriends.filter((friend) =>
+    friend.name.toLowerCase().includes(search.trim().toLowerCase()),
+  )
+
   return (
     <div className='Message'>
       <div className='message-top'>
@@ -45,22 +50,20 @@ export default function Message () {
       </div>
       <div className="border-div"></div>
       {error && <p role='alert'>{error}</p>}
-      {friends.filter((friend) => friend.name.toLowerCase().includes(search.trim().toLowerCase())).map((friend) => (
-          <Link to={`/chatbox/${friend.id}`} key={friend.id}>
-            <div className='message'>
-              <div className="user">
-                {friend.avatar && <img src={getMediaUrl(friend.avatar)} alt="" />}
-              </div>
-              <div className="message-body">
-                <h5>{friend.name}</h5>
-                <p>Open conversation</p>
-              </div>
+      {filteredFriends.map((friend) => (
+        <Link to={`/chatbox/${friend.id}`} key={friend.id}>
+          <div className='message'>
+            <div className="user">
+              {friend.avatar && <img src={getMediaUrl(friend.avatar)} alt="" />}
             </div>
-          </Link>
+            <div className="message-body">
+              <h5>{friend.name}</h5>
+              <p>Open conversation</p>
+            </div>
+          </div>
+        </Link>
       ))}
-      {!error && friends.length > 0 && !friends.some((friend) => (
-        friend.name.toLowerCase().includes(search.trim().toLowerCase())
-      )) && <p>No friends match your search.</p>}
+      {!error && validFriends.length > 0 && filteredFriends.length === 0 && <p>No friends match your search.</p>}
     </div>
   )
 }

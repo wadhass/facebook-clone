@@ -1,7 +1,8 @@
 const configuredApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
-const apiUrl = new URL(
-  configuredApiUrl.includes('://') ? configuredApiUrl : `https://${configuredApiUrl}`,
-)
+const normalizedApiUrl = configuredApiUrl.startsWith('http://') || configuredApiUrl.startsWith('https://')
+  ? configuredApiUrl
+  : `${import.meta.env.DEV ? 'http' : 'https'}://${configuredApiUrl}`
+const apiUrl = new URL(normalizedApiUrl)
 if (apiUrl.pathname === '/') apiUrl.pathname = '/api'
 const API_URL = apiUrl.toString().replace(/\/$/, '')
 
