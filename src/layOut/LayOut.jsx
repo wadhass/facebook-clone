@@ -19,6 +19,7 @@ import { RealtimeProvider } from '../realtime/RealtimeContext'
 import { CallProvider } from '../calls/CallProvider'
 import CallOverlay from '../calls/CallOverlay'
 import Calls from '../pages/calls/Calls'
+import Reels from '../pages/reels/Reels'
 
 function ProtectedLayout() {
   const { user, loading, authError } = useAuth()
@@ -57,6 +58,7 @@ const router = createBrowserRouter([
       { path: 'groups', element: <Groups /> },
       { path: 'groups/:id', element: <GroupChat /> },
       { path: 'calls', element: <Calls /> },
+      { path: 'reels', element: <Reels /> },
     ],
   },
   { path: '/login', element: <Login /> },

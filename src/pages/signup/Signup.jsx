@@ -5,7 +5,7 @@ import AuthLayout from '../../components/auth/AuthLayout'
 import PasswordInput from '../../components/auth/PasswordInput'
 
 export default function Signup(){
-  const { signUp } = useAuth()
+  const { signUp, signInWithGoogle } = useAuth()
   const navigate = useNavigate()
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -23,6 +23,19 @@ export default function Signup(){
         password: form.get('password'),
       })
       navigate('/verify-email', { state: { email: result.email } })
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  async function handleGoogleSignIn() {
+    setError('')
+    setSubmitting(true)
+    try {
+      await signInWithGoogle()
+      navigate('/', { replace: true })
     } catch (requestError) {
       setError(requestError.message)
     } finally {
@@ -77,6 +90,14 @@ export default function Signup(){
         <button type='submit' className='auth-submit' disabled={submitting}>
           {submitting ? 'Creating your account...' : 'Create account'}
           {!submitting && <span aria-hidden='true'>→</span>}
+        </button>
+        <button
+          type='button'
+          className='auth-submit auth-submit--secondary'
+          disabled={submitting}
+          onClick={handleGoogleSignIn}
+        >
+          Continue with Google
         </button>
         <p className='auth-terms'>By continuing, you agree to keep Qavero kind and welcoming.</p>
       </form>

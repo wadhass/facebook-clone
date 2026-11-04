@@ -10,6 +10,7 @@ export default function AddPost () {
   const { user } = useAuth()
   const [text, setText] = useState('')
   const [media, setMedia] = useState(null)
+  const [isReel, setIsReel] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -31,13 +32,32 @@ export default function AddPost () {
       setError('Media files must be 50 MB or smaller')
       return
     }
+    if (isReel && !file.type.startsWith('video/')) {
+      setError('A reel must be a video')
+      return
+    }
 
     setMedia({ file, previewUrl: URL.createObjectURL(file) })
+  }
+
+  function handleReelChange(event) {
+    const enabled = event.target.checked
+    setIsReel(enabled)
+    if (enabled && media && !media.file.type.startsWith('video/')) {
+      setMedia(null)
+      setError('Choose a video to create a reel')
+    } else {
+      setError('')
+    }
   }
 
   async function handleSubmit(event) {
     event.preventDefault()
     setError('')
+    if (isReel && (!media || !media.file.type.startsWith('video/'))) {
+      setError('Choose a video to create a reel')
+      return
+    }
     if (!text.trim() && !media) {
       setError('Write something or add a photo or video')
       return
@@ -49,16 +69,18 @@ export default function AddPost () {
         ? (() => {
             const formData = new FormData()
             formData.append('text', text)
+            formData.append('isReel', String(isReel))
             formData.append('media', media.file)
             return formData
           })()
-        : JSON.stringify({ text })
+        : JSON.stringify({ text, isReel })
       await apiRequest('/posts', {
         method: 'POST',
         body,
       })
       setText('')
       setMedia(null)
+      setIsReel(false)
       window.dispatchEvent(new Event('posts:updated'))
     } catch (requestError) {
       setError(requestError.message)
@@ -75,7 +97,7 @@ export default function AddPost () {
           type="text"
           value={text}
           onChange={(event) => setText(event.target.value)}
-          placeholder='What is on your mind?'
+          placeholder={isReel ? 'Add a caption to your reel…' : 'What is on your mind?'}
           maxLength={5000}
         />
         <button type='submit' className='btn btn-primary' disabled={submitting || (!text.trim() && !media)}>
@@ -93,8 +115,12 @@ export default function AddPost () {
       </div>
     )}
     <label className='post-media-picker'>
-      <span>Add a photo or video</span>
-      <input type='file' accept='image/*,video/*' onChange={handleMediaChange} />
+      <span>{isReel ? 'Choose a reel video' : 'Choose a photo or video from your device'}</span>
+      <input type='file' accept={isReel ? 'video/*' : 'image/*,video/*'} onChange={handleMediaChange} />
+    </label>
+    <label className='post-reel-option'>
+      <input type='checkbox' checked={isReel} onChange={handleReelChange} />
+      <span>Share this video as a Reel</span>
     </label>
     {error && <p role='alert'>{error}</p>}
    </form>

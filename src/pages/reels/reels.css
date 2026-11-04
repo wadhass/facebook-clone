@@ -1,0 +1,175 @@
+.reels-page {
+  display: grid;
+  justify-items: center;
+  gap: 1.25rem;
+  padding-bottom: 2rem;
+}
+
+.reels-header {
+  display: flex;
+  width: min(100%, 620px);
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.reels-header h1 {
+  margin: .25rem 0;
+}
+
+.reels-header p {
+  margin: 0;
+  color: var(--color-soft);
+}
+
+.reels-eyebrow {
+  color: #6c63ff;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+
+.reels-create-link {
+  padding: .65rem .9rem;
+  border-radius: .65rem;
+  background: #6c63ff;
+  color: white;
+  font-weight: 650;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.reels-list {
+  display: grid;
+  width: min(100%, 620px);
+  gap: 1.5rem;
+}
+
+.reel-card {
+  position: relative;
+  min-height: min(75vh, 760px);
+  overflow: hidden;
+  border-radius: 1rem;
+  background: #111;
+  color: white;
+  isolation: isolate;
+}
+
+.reel-card > video {
+  display: block;
+  width: 100%;
+  height: min(75vh, 760px);
+  min-height: 440px;
+  object-fit: contain;
+  background: #111;
+}
+
+.reel-caption {
+  position: absolute;
+  right: 5rem;
+  bottom: 1.4rem;
+  left: 1rem;
+  z-index: 1;
+  pointer-events: none;
+  text-shadow: 0 1px 5px #000;
+}
+
+.reel-caption a {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  color: white;
+  text-decoration: none;
+  pointer-events: auto;
+}
+
+.reel-caption img,
+.reel-avatar-placeholder {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 50%;
+  background: #6c63ff;
+  color: white;
+  object-fit: cover;
+}
+
+.reel-caption p {
+  margin: .55rem 0 0;
+  white-space: pre-wrap;
+}
+
+.reel-actions {
+  position: absolute;
+  right: .8rem;
+  bottom: 1.3rem;
+  z-index: 2;
+  display: grid;
+  gap: .8rem;
+}
+
+.reel-actions button {
+  display: grid;
+  min-width: 2.8rem;
+  justify-items: center;
+  gap: .25rem;
+  padding: .45rem;
+  border: 0;
+  border-radius: 2rem;
+  background: rgba(0, 0, 0, .4);
+  color: white;
+  cursor: pointer;
+}
+
+.reel-actions button.is-liked {
+  color: #ff5b78;
+}
+
+.reel-actions button span {
+  font-size: .75rem;
+}
+
+.reel-comments {
+  position: absolute;
+  right: .75rem;
+  bottom: 5.5rem;
+  left: .75rem;
+  z-index: 3;
+  max-height: 45%;
+  overflow: auto;
+  padding: .75rem;
+  border-radius: .75rem;
+  background: var(--color-card);
+  color: var(--color-primary);
+}
+
+.reels-empty {
+  padding: 2rem;
+  text-align: center;
+}
+
+.reels-error {
+  color: #b83249;
+}
+
+.reels-load-more {
+  margin: 0 auto;
+}
+
+@media (max-width: 600px) {
+  .reels-header,
+  .reels-list {
+    width: 100%;
+  }
+
+  .reel-card {
+    min-height: min(72vh, 700px);
+    border-radius: .75rem;
+  }
+
+  .reel-card > video {
+    height: min(72vh, 700px);
+    min-height: 400px;
+  }
+}

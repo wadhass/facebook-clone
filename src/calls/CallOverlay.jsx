@@ -36,12 +36,21 @@ export default function CallOverlay() {
   const remoteVideoRef = useRef(null)
   const remoteAudioRef = useRef(null)
   const [duration, setDuration] = useState(0)
+  const [audioBlocked, setAudioBlocked] = useState(false)
   const finished = ['ended', 'missed', 'rejected', 'offline'].includes(call?.status)
 
   useEffect(() => {
     if (localVideoRef.current) localVideoRef.current.srcObject = call?.localStream ?? null
     if (remoteVideoRef.current) remoteVideoRef.current.srcObject = call?.remoteStream ?? null
-    if (remoteAudioRef.current) remoteAudioRef.current.srcObject = call?.remoteStream ?? null
+    if (!remoteAudioRef.current) return
+    remoteAudioRef.current.srcObject = call?.remoteStream ?? null
+    if (call?.remoteStream) {
+      remoteAudioRef.current.play().catch(() => {
+        setAudioBlocked(true)
+      })
+    } else {
+      setAudioBlocked(false)
+    }
   }, [call?.localStream, call?.remoteStream])
 
   useEffect(() => {
@@ -63,6 +72,15 @@ export default function CallOverlay() {
       await action()
     } catch (actionError) {
       setError(actionError.message)
+    }
+  }
+
+  async function enableCallAudio() {
+    try {
+      await remoteAudioRef.current?.play()
+      setAudioBlocked(false)
+    } catch (playError) {
+      setError(playError.message || 'Call audio could not be started')
     }
   }
 
@@ -122,6 +140,11 @@ export default function CallOverlay() {
           <p>{statusText}</p>
         </div>
         {error && <p className='call-inline-error' role='alert'>{error}</p>}
+        {audioBlocked && call.remoteStream && (
+          <button type='button' className='call-audio-enable' onClick={enableCallAudio}>
+            Tap to hear your friend
+          </button>
+        )}
 
         {call.status === 'incoming' ? (
           <div className='call-actions'>

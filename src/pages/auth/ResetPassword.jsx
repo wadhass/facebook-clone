@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { apiRequest } from '../../api'
+import { useAuth } from '../../auth/useAuth'
 import AuthLayout from '../../components/auth/AuthLayout'
 import PasswordInput from '../../components/auth/PasswordInput'
 
@@ -9,11 +9,15 @@ export default function ResetPassword() {
   const [searchParams] = useSearchParams()
   const location = useLocation()
   const navigate = useNavigate()
+  const { requestPasswordReset, resetPassword } = useAuth()
   const [email, setEmail] = useState(location.state?.email ?? '')
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const token = routeToken ?? searchParams.get('token')
+  const oobCode = searchParams.get('oobCode')
+  const isResetLink = Boolean(oobCode && searchParams.get('mode') === 'resetPassword')
+  const hasResetToken = Boolean(token || isResetLink)
 
   async function handleRequestReset(event) {
     event.preventDefault()
@@ -22,10 +26,7 @@ export default function ResetPassword() {
     setSubmitting(true)
 
     try {
-      const result = await apiRequest('/auth/forgot-password', {
-        method: 'POST',
-        body: JSON.stringify({ email }),
-      })
+      const result = await requestPasswordReset(email)
       setMessage(result.message)
     } catch (requestError) {
       setError(requestError.message)
@@ -48,10 +49,7 @@ export default function ResetPassword() {
     }
 
     try {
-      await apiRequest(`/auth/reset-password/${encodeURIComponent(token)}`, {
-        method: 'POST',
-        body: JSON.stringify({ password }),
-      })
+      await resetPassword({ oobCode: isResetLink ? oobCode : undefined, password, token })
       navigate('/login', { replace: true, state: { message: 'Your password has been reset. Sign in with your new password.' } })
     } catch (requestError) {
       setError(requestError.message)
@@ -62,16 +60,16 @@ export default function ResetPassword() {
 
   return (
     <AuthLayout
-      eyebrow={token ? 'CHOOSE A NEW PASSWORD' : 'ACCOUNT RECOVERY'}
-      title={token ? 'You’re back in control.' : 'Reset your password.'}
-      description={token
+      eyebrow={hasResetToken ? 'CHOOSE A NEW PASSWORD' : 'ACCOUNT RECOVERY'}
+      title={hasResetToken ? 'You’re back in control.' : 'Reset your password.'}
+      description={hasResetToken
         ? 'Choose a strong new password you haven’t used on Qavero before.'
         : 'Enter the email linked to your account and we’ll send you a secure reset link.'}
-      footer={token
+      footer={hasResetToken
         ? <>Need a fresh link? <Link to='/reset-password'>Request another</Link></>
         : <>Remembered it? <Link to='/login'>Back to sign in</Link></>}
     >
-      {token ? (
+      {hasResetToken ? (
         <form className='auth-form' onSubmit={handleSubmit}>
           <PasswordInput
             id='reset-password'

@@ -47,6 +47,12 @@ export default function LeftBar  ()  {
           <h4>Calls</h4>
         </div>
       </Link>
+      <Link to='/reels' aria-label='Reels'>
+        <div className='item'>
+          <span aria-hidden='true'>▷</span>
+          <h4>Reels</h4>
+        </div>
+      </Link>
       <Link to='/groups' aria-label='Group chats'>
         <div className='item'>
           <span aria-hidden='true'>◎</span>

@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { apiRequest } from '../../api'
+import { useAuth } from '../../auth/useAuth'
 import AuthLayout from '../../components/auth/AuthLayout'
 
 export default function ForgotPassword() {
+  const { requestPasswordReset } = useAuth()
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -16,10 +17,7 @@ export default function ForgotPassword() {
     setSubmitting(true)
 
     try {
-      const result = await apiRequest('/auth/forgot-password', {
-        method: 'POST',
-        body: JSON.stringify({ email }),
-      })
+      const result = await requestPasswordReset(email)
       setMessage(result.message)
     } catch (requestError) {
       setError(requestError.message)

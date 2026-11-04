@@ -1,3 +1,5 @@
+import { auth } from './firebase/firebaseConfig'
+
 const configuredApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 const normalizedApiUrl = configuredApiUrl.startsWith('http://') || configuredApiUrl.startsWith('https://')
   ? configuredApiUrl
@@ -14,9 +16,14 @@ export function getMediaUrl(mediaUrl) {
   return new URL(mediaUrl, API_URL).href
 }
 
+export async function getAuthToken() {
+  if (auth.currentUser) return auth.currentUser.getIdToken()
+  return localStorage.getItem('authToken')
+}
+
 export async function apiRequest(path, options = {}) {
   const headers = new Headers(options.headers)
-  const token = localStorage.getItem('authToken')
+  const token = await getAuthToken()
 
   if (token) headers.set('Authorization', `Bearer ${token}`)
   if (options.body && !(options.body instanceof FormData)) {

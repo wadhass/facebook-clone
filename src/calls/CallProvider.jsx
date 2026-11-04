@@ -58,6 +58,7 @@ export function CallProvider({ children }) {
 
   const receiveSignal = useCallback(async (signal) => {
     const activeCall = callRef.current
+    if (activeCall?.callId && activeCall.callId !== signal.callId) return
     if (!peerConnectionRef.current || activeCall?.callId !== signal.callId) {
       pendingSignalsRef.current.push(signal)
       return
@@ -97,7 +98,14 @@ export function CallProvider({ children }) {
       if (event.candidate) sendSignal({ type: 'ice', candidate: event.candidate.toJSON() })
     }
     peer.ontrack = (event) => {
-      remoteStreamRef.current = event.streams[0] ?? new MediaStream([event.track])
+      if (event.streams[0]) {
+        remoteStreamRef.current = event.streams[0]
+      } else {
+        remoteStreamRef.current ??= new MediaStream()
+        if (!remoteStreamRef.current.getTracks().some((track) => track.id === event.track.id)) {
+          remoteStreamRef.current.addTrack(event.track)
+        }
+      }
       updateCall((current) => current ? { ...current, remoteStream: remoteStreamRef.current } : current)
     }
     peer.onconnectionstatechange = () => {

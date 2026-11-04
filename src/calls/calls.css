@@ -229,6 +229,18 @@
   text-align: center;
 }
 
+.call-audio-enable {
+  position: relative;
+  z-index: 2;
+  margin-top: 12px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: white;
+  color: #17162e;
+  font-weight: 650;
+  cursor: pointer;
+}
+
 .call-error-toast {
   position: fixed;
   right: 18px;
