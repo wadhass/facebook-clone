@@ -2,7 +2,7 @@ import './chatbox.css'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { apiRequest, getMediaUrl } from '../../api'
+import { apiRequest, getAuthToken, getMediaUrl } from '../../api'
 import { useAuth } from '../../auth/useAuth'
 import { useRealtime } from '../../realtime/useRealtime'
 import { useCalls } from '../../calls/useCalls'
@@ -21,6 +21,59 @@ import {
 const emojiOptions = ['😀', '😂', '🥰', '😍', '😮', '😢', '😡', '👍', '❤️', '🎉', '👋', '🙏']
 const stickerOptions = ['❤️', '😂', '🥰', '👍', '🎉', '👋', '🙌', '😍']
 
+function VoiceAttachment({ mediaUrl }) {
+  const [audioUrl, setAudioUrl] = useState('')
+  const [failed, setFailed] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    let objectUrl = ''
+
+    async function loadAudio() {
+      try {
+        const token = await getAuthToken()
+        const headers = new Headers()
+        if (token) headers.set('Authorization', `Bearer ${token}`)
+        const response = await fetch(mediaUrl, { headers })
+        if (!response.ok) throw new Error('Voice message could not be loaded')
+        objectUrl = URL.createObjectURL(await response.blob())
+        if (cancelled) URL.revokeObjectURL(objectUrl)
+        else setAudioUrl(objectUrl)
+      } catch {
+        if (!cancelled) setFailed(true)
+      }
+    }
+
+    loadAudio()
+    return () => {
+      cancelled = true
+      if (objectUrl) URL.revokeObjectURL(objectUrl)
+    }
+  }, [mediaUrl])
+
+  if (failed) return <span role='status'>Voice message unavailable</span>
+  if (!audioUrl) return <span role='status'>Loading voice message...</span>
+
+  return (
+    <span className='chat-audio-attachment'>
+      <audio src={audioUrl} controls preload='metadata' />
+      <select
+        aria-label='Voice message playback speed'
+        defaultValue='1'
+        onChange={(event) => {
+          const audio = event.currentTarget.previousElementSibling
+          if (audio) audio.playbackRate = Number(event.target.value)
+        }}
+      >
+        <option value='0.75'>0.75×</option>
+        <option value='1'>1×</option>
+        <option value='1.25'>1.25×</option>
+        <option value='1.5'>1.5×</option>
+        <option value='2'>2×</option>
+      </select>
+    </span>
+  )
+}
 
 export default function ChatBox () {
   const { id: friendId } = useParams()
@@ -430,23 +483,7 @@ export default function ChatBox () {
               <video className='chat-attachment-video' src={getMediaUrl(message.mediaUrl)} controls preload='metadata' />
             )}
             {message.mediaUrl && message.type === 'audio' && (
-              <span className='chat-audio-attachment'>
-                <audio src={getMediaUrl(message.mediaUrl)} controls preload='metadata' />
-                <select
-                  aria-label='Voice message playback speed'
-                  defaultValue='1'
-                  onChange={(event) => {
-                    const audio = event.currentTarget.previousElementSibling
-                    if (audio) audio.playbackRate = Number(event.target.value)
-                  }}
-                >
-                  <option value='0.75'>0.75×</option>
-                  <option value='1'>1×</option>
-                  <option value='1.25'>1.25×</option>
-                  <option value='1.5'>1.5×</option>
-                  <option value='2'>2×</option>
-                </select>
-              </span>
+              <VoiceAttachment mediaUrl={getMediaUrl(message.mediaUrl)} />
             )}
             {message.mediaUrl && message.type === 'file' && (
               <a className='chat-file-attachment' href={getMediaUrl(message.mediaUrl)} download={message.fileName}>
