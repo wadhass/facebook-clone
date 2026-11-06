@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faArrowAltCircleRight,
   faCamera,
+  faImage,
   faMicrophone,
   faPhone,
   faStop,
@@ -521,6 +522,15 @@ export default function ChatBox () {
             onChange={chooseAttachment}
             aria-label='Take or upload a photo'
           />
+      </label>
+      <label className='chat-attach-button chat-upload-button' title='Upload a picture'>
+        <FontAwesomeIcon icon={faImage} aria-hidden='true' />
+        <input
+          type='file'
+          accept='image/*'
+          onChange={chooseAttachment}
+          aria-label='Upload a picture'
+        />
       </label>
       {recording ? (
         <button

@@ -19,6 +19,7 @@ export function CallProvider({ children }) {
   const pendingSignalsRef = useRef([])
   const screenTrackRef = useRef(null)
   const finishTimerRef = useRef(null)
+  const callAttemptRef = useRef(0)
   const pendingAcceptedRef = useRef(null)
   const acceptedHandlerRef = useRef(null)
 
@@ -41,6 +42,7 @@ export function CallProvider({ children }) {
   }, [])
 
   const closeCall = useCallback((nextCall = null) => {
+    callAttemptRef.current += 1
     window.clearTimeout(finishTimerRef.current)
     releaseMedia()
     updateCall(nextCall)
@@ -219,6 +221,7 @@ export function CallProvider({ children }) {
     if (!navigator.mediaDevices?.getUserMedia) {
       throw new Error('Audio and video calls require a supported browser and secure connection')
     }
+    const attempt = ++callAttemptRef.current
     setError('')
     updateCall({
       peer,
@@ -231,10 +234,15 @@ export function CallProvider({ children }) {
     })
     try {
       const { iceServers } = await apiRequest('/calls/ice-servers')
+      if (attempt !== callAttemptRef.current) return
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: kind === 'video' ? { facingMode: 'user' } : false,
       })
+      if (attempt !== callAttemptRef.current) {
+        stopTracks(stream)
+        return
+      }
       iceServersRef.current = iceServers
       localStreamRef.current = stream
       updateCall((current) => current ? { ...current, localStream: stream, status: 'outgoing' } : current)
@@ -245,6 +253,11 @@ export function CallProvider({ children }) {
           else resolve(result)
         })
       })
+      if (attempt !== callAttemptRef.current) {
+        if (response.callId) socket.emit('call:end', { callId: response.callId })
+        stopTracks(stream)
+        return
+      }
       if (response.status === 'missed') {
         updateCall((current) => ({
           ...current,
@@ -265,6 +278,7 @@ export function CallProvider({ children }) {
         acceptedHandlerRef.current?.(acceptedCall)
       }
     } catch (requestError) {
+      if (attempt !== callAttemptRef.current) return
       closeCall()
       throw requestError
     }
@@ -273,17 +287,27 @@ export function CallProvider({ children }) {
   const acceptCall = useCallback(async () => {
     const activeCall = callRef.current
     if (activeCall?.status !== 'incoming' || !socket?.connected) return
+    const attempt = ++callAttemptRef.current
     setError('')
     try {
       const { iceServers } = await apiRequest('/calls/ice-servers')
+      if (attempt !== callAttemptRef.current) return
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: activeCall.kind === 'video' ? { facingMode: 'user' } : false,
       })
+      if (attempt !== callAttemptRef.current) {
+        stopTracks(stream)
+        return
+      }
       iceServersRef.current = iceServers
       localStreamRef.current = stream
       updateCall((current) => current ? { ...current, localStream: stream, status: 'connecting' } : current)
       socket.timeout(10000).emit('call:accept', { callId: activeCall.callId }, (timeoutError, result) => {
+        if (attempt !== callAttemptRef.current) {
+          if (result?.accepted) socket.emit('call:end', { callId: activeCall.callId })
+          return
+        }
         if (timeoutError || result?.error) {
           setError(result?.error || 'The call could not be accepted')
           socket.emit('call:end', { callId: activeCall.callId })
@@ -291,6 +315,7 @@ export function CallProvider({ children }) {
         }
       })
     } catch (requestError) {
+      if (attempt !== callAttemptRef.current) return
       setError(requestError.message || 'Microphone or camera access was denied')
       socket.emit('call:reject', { callId: activeCall.callId }, () => {})
       closeCall()

@@ -122,7 +122,7 @@ export default function CallOverlay() {
 
         {call.kind === 'video' && call.status !== 'incoming' && (
           <div className='call-video-stage'>
-            <video ref={remoteVideoRef} autoPlay playsInline aria-label='Remote video' />
+            <video ref={remoteVideoRef} autoPlay playsInline muted aria-label='Remote video' />
             <video ref={localVideoRef} autoPlay playsInline muted aria-label='Your video' />
             <audio ref={remoteAudioRef} autoPlay playsInline />
           </div>

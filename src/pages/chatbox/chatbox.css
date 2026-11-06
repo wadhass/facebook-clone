@@ -176,7 +176,7 @@
 .chat-box-bottom{
     position: relative;
     display: grid;
-    grid-template-columns: auto auto auto minmax(0, 1fr) auto;
+    grid-template-columns: auto auto auto auto minmax(0, 1fr) auto;
     align-items: center;
     gap: .55rem;
     background: rgba(255, 255, 255, 0.78);
@@ -363,7 +363,7 @@
 
 @media (max-width:480px) {
     .chat-box-bottom{
-        grid-template-columns: auto auto auto minmax(0, 1fr) auto;
+        grid-template-columns: auto auto auto auto minmax(0, 1fr) auto;
         width: calc(100% - 1rem);
         margin: .5rem;
         padding: .55rem;
