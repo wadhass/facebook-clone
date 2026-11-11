@@ -7,6 +7,10 @@ function stopTracks(stream) {
   stream?.getTracks().forEach((track) => track.stop())
 }
 
+function isCallFinished(status) {
+  return ['ended', 'missed', 'rejected', 'offline'].includes(status)
+}
+
 export function CallProvider({ children }) {
   const { socket } = useRealtime()
   const [call, setCall] = useState(null)
@@ -135,10 +139,11 @@ export function CallProvider({ children }) {
     if (!socket) return undefined
 
     const handleIncoming = ({ callId, caller, kind, startedAt }) => {
-      if (callRef.current) {
+      if (callRef.current && !isCallFinished(callRef.current.status)) {
         socket.emit('call:reject', { callId }, () => {})
         return
       }
+      window.clearTimeout(finishTimerRef.current)
       setError('')
       updateCall({
         callId,

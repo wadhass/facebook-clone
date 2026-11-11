@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { apiRequest, getMediaUrl } from '../../api'
+import { useRealtime } from '../../realtime/useRealtime'
 
 // Font Awesome icon.........
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -12,6 +13,7 @@ import { faFeed, faMessage } from '@fortawesome/free-solid-svg-icons'
 export default function UserProfile () {
   const { id } = useParams()
   const { user: currentUser, updateAvatar } = useAuth()
+  const { onlineUserIds } = useRealtime()
   const [profile, setProfile] = useState(null)
   const [error, setError] = useState('')
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
@@ -129,7 +131,14 @@ export default function UserProfile () {
     <div className='userProfile'>
         <div className="cover-photos"></div>
         <div className="profile-info">
-            {profile.avatar && <img src={getMediaUrl(profile.avatar)} alt={`${profile.name}'s profile`} />}
+            {profile.avatar && (
+              <span className='profile-avatar-wrap'>
+                <img src={getMediaUrl(profile.avatar)} alt={`${profile.name}'s profile`} />
+                {!isSelf && onlineUserIds.has(profile.id) && (
+                  <span className='profile-online-indicator' role='img' aria-label='Online' title='Online' />
+                )}
+              </span>
+            )}
             <div className="user-name">
                 <h3>{profile.name}</h3>
             </div>
