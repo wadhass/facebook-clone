@@ -9,6 +9,7 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
   signOut as firebaseSignOut,
   updateProfile,
 } from 'firebase/auth'
@@ -149,8 +150,14 @@ export function AuthProvider({ children }) {
   }, [authenticateLegacy, syncFirebaseUser])
 
   const signInWithGoogle = useCallback(async () => {
-    const credential = await signInWithPopup(auth, googleProvider)
-    return syncFirebaseUser(credential.user)
+    try {
+      const credential = await signInWithPopup(auth, googleProvider)
+      return syncFirebaseUser(credential.user)
+    } catch (error) {
+      if (error.code !== 'auth/popup-blocked') throw error
+      await signInWithRedirect(auth, googleProvider)
+      return { redirecting: true }
+    }
   }, [syncFirebaseUser])
 
   const verifyEmail = useCallback(async ({ email, code, oobCode } = {}) => {

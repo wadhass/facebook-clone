@@ -134,11 +134,13 @@ export default function UserProfile () {
                 <h3>{profile.name}</h3>
             </div>
             <div className='profile-stats' aria-label='Profile connections'>
-                <div><strong>{profile.friendCount}</strong><span>Friends</span></div>
-                <Link to={`/connections/${id}?tab=followers`}>
+                <Link to={`/connections/${id}?tab=friends`} aria-label={`${profile.friendCount} friends`}>
+                    <strong>{profile.friendCount}</strong><span>Friends</span>
+                </Link>
+                <Link to={`/connections/${id}?tab=friends`} aria-label={`${profile.followersCount} followers`}>
                     <strong>{profile.followersCount}</strong><span>Followers</span>
                 </Link>
-                <Link to={`/connections/${id}?tab=following`}>
+                <Link to={`/connections/${id}?tab=friends`} aria-label={`${profile.followingCount} following`}>
                     <strong>{profile.followingCount}</strong><span>Following</span>
                 </Link>
             </div>

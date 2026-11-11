@@ -1,6 +1,7 @@
 import './addPost.css'
 
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { apiRequest, getMediaUrl } from '../../api'
 
@@ -8,15 +9,20 @@ const MAX_MEDIA_SIZE = 50 * 1024 * 1024
 
 export default function AddPost () {
   const { user } = useAuth()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [text, setText] = useState('')
   const [media, setMedia] = useState(null)
-  const [isReel, setIsReel] = useState(false)
+  const [isReel, setIsReel] = useState(() => searchParams.get('create') === 'reel')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => () => {
     if (media) URL.revokeObjectURL(media.previewUrl)
   }, [media])
+
+  useEffect(() => {
+    setIsReel(searchParams.get('create') === 'reel')
+  }, [searchParams])
 
   function handleMediaChange(event) {
     const file = event.target.files?.[0]
@@ -81,6 +87,13 @@ export default function AddPost () {
       setText('')
       setMedia(null)
       setIsReel(false)
+      if (searchParams.has('create')) {
+        setSearchParams((currentParams) => {
+          const nextParams = new URLSearchParams(currentParams)
+          nextParams.delete('create')
+          return nextParams
+        }, { replace: true })
+      }
       window.dispatchEvent(new Event('posts:updated'))
     } catch (requestError) {
       setError(requestError.message)

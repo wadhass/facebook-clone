@@ -3,7 +3,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { apiRequest, getMediaUrl } from '../../api'
 import './connections.css'
 
-const connectionTabs = ['followers', 'following']
+const connectionTabs = ['friends', 'followers', 'following']
 
 export default function Connections() {
   const { id } = useParams()
@@ -23,11 +23,13 @@ export default function Connections() {
     try {
       const [profileData, connectionsData] = await Promise.all([
         apiRequest(`/users/${id}`),
-        apiRequest(`/follows/${id}/${activeTab}?page=1`),
+        activeTab === 'friends'
+          ? apiRequest(`/friends/${id}`)
+          : apiRequest(`/follows/${id}/${activeTab}?page=1`),
       ])
       setProfile(profileData.user)
-      setUsers(connectionsData.users)
-      setHasMore(connectionsData.hasMore)
+      setUsers(connectionsData.users ?? connectionsData.friends)
+      setHasMore(connectionsData.hasMore ?? false)
       setPage(1)
     } catch (requestError) {
       setError(requestError.message)
@@ -67,7 +69,7 @@ export default function Connections() {
         </div>
       </header>
 
-      <div className='connections-tabs' role='tablist' aria-label='Followers and following'>
+      <div className='connections-tabs' role='tablist' aria-label='Friends, followers, and following'>
         {connectionTabs.map((tab) => (
           <button
             type='button'

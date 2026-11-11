@@ -90,7 +90,7 @@ export default function Reels() {
           <h1>Reels</h1>
           <p>Watch videos shared by your community.</p>
         </div>
-        <Link className='reels-create-link' to='/'>Create a Reel</Link>
+        <Link className='reels-create-link' to='/?create=reel'>Create a Reel</Link>
       </header>
       {error && <p className='reels-error' role='alert'>{error}</p>}
       {loading && <p role='status'>Loading reels...</p>}

@@ -48,6 +48,9 @@
     color: var(--color-soft);
     font-size: .85rem;
 }
+.profile-stats>a:hover{
+    color: var(--color-primary);
+}
 .profile-button{
     display: flex;
     align-items: center;

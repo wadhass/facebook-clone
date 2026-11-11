@@ -40,12 +40,12 @@ export default function Login() {
     setSubmitting(true)
 
     try {
-      await signInWithGoogle()
-      navigate('/', { replace: true })
+      const result = await signInWithGoogle()
+      if (!result?.redirecting) navigate('/', { replace: true })
     } catch (requestError) {
       const messages = {
         'auth/popup-closed-by-user': 'Google sign-in was cancelled.',
-        'auth/popup-blocked': 'Allow pop-ups to sign in with Google, then try again.',
+        'auth/popup-blocked': 'Google sign-in could not open. Try again or allow pop-ups for this site.',
         'auth/unauthorized-domain': 'This site is not authorized for Google sign-in in Firebase.',
       }
       setError(messages[requestError.code] || requestError.message)
