@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { apiRequest, getMediaUrl } from '../../api'
+import { useRealtime } from '../../realtime/useRealtime'
 import './friends.css'
 
 const tabs = ['friends', 'requests', 'discover']
 
 export default function Friends() {
+  const { onlineUserIds } = useRealtime()
   const [searchParams, setSearchParams] = useSearchParams()
   const [data, setData] = useState({ friends: [], incoming: [], outgoing: [] })
   const [suggestions, setSuggestions] = useState([])
@@ -125,9 +127,12 @@ export default function Friends() {
           {filteredFriends.map((friend) => (
             <article className='friend-card' key={friend.id}>
               <Link to={`/profile/${friend.id}`} className='user'>
-                {friend.avatar
-                  ? <img src={getMediaUrl(friend.avatar)} alt='' />
-                  : <span className='friend-avatar-fallback' aria-hidden='true'>{friend.name?.[0] ?? '?'}</span>}
+                <span className='friend-avatar-wrap'>
+                  {friend.avatar
+                    ? <img src={getMediaUrl(friend.avatar)} alt='' />
+                    : <span className='friend-avatar-fallback' aria-hidden='true'>{friend.name?.[0] ?? '?'}</span>}
+                  {onlineUserIds.has(friend.id) && <span className='friend-online-indicator' aria-label='Online' title='Online' />}
+                </span>
                 <h3>{friend.name}</h3>
               </Link>
               <Link className='btn btn-primary' to={`/chatbox/${friend.id}`}>

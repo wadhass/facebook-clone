@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { apiRequest, getMediaUrl } from '../../api'
+import { useRealtime } from '../../realtime/useRealtime'
 import './connections.css'
 
 const connectionTabs = ['friends', 'followers', 'following']
 
 export default function Connections() {
+  const { onlineUserIds } = useRealtime()
   const { id } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
   const [profile, setProfile] = useState(null)
@@ -90,9 +92,12 @@ export default function Connections() {
         <div className='connections-list'>
           {users.map((person) => (
             <Link to={`/profile/${person.id}`} className='connection-card' key={person.id}>
-              {person.avatar
-                ? <img src={getMediaUrl(person.avatar)} alt='' />
-                : <span className='connection-avatar-placeholder'>{person.name?.[0] ?? '?'}</span>}
+              <span className='connection-avatar-wrap'>
+                {person.avatar
+                  ? <img src={getMediaUrl(person.avatar)} alt='' />
+                  : <span className='connection-avatar-placeholder'>{person.name?.[0] ?? '?'}</span>}
+                {onlineUserIds.has(person.id) && <span className='connection-online-indicator' aria-label='Online' title='Online' />}
+              </span>
               <span>{person.name}</span>
             </Link>
           ))}

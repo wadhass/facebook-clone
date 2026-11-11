@@ -42,11 +42,12 @@
 .green-active{
     height: 10px;
     width: 10px;
-    background: var(--color-primary);
+    background: #22c55e;
     position: absolute;
     bottom: 0;
     right: 0;
     border-radius: 50%;
+    border: 2px solid var(--color-card);
 }
 .message p{
     font-size: .9rem;

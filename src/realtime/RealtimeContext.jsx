@@ -5,6 +5,7 @@ import RealtimeContext from './context'
 
 export function RealtimeProvider({ userId, children }) {
   const [socket, setSocket] = useState(null)
+  const [onlineUserIds, setOnlineUserIds] = useState(() => new Set())
 
   useEffect(() => {
     if (!userId) {
@@ -27,15 +28,30 @@ export function RealtimeProvider({ userId, children }) {
       reconnectionAttempts: Infinity,
       reconnectionDelayMax: 10000,
     })
+    connection.on('presence:state', ({ onlineUserIds: ids = [] } = {}) => {
+      setOnlineUserIds(new Set(ids))
+    })
+    connection.on('presence:update', ({ userId: changedUserId, online }) => {
+      setOnlineUserIds((currentIds) => {
+        const nextIds = new Set(currentIds)
+        if (online) nextIds.add(changedUserId)
+        else nextIds.delete(changedUserId)
+        return nextIds
+      })
+    })
+    connection.on('disconnect', () => setOnlineUserIds(new Set()))
     setSocket(connection)
     connection.connect()
 
     return () => {
+      connection.removeAllListeners('presence:state')
+      connection.removeAllListeners('presence:update')
+      connection.removeAllListeners('disconnect')
       connection.disconnect()
       setSocket(null)
     }
   }, [userId])
 
-  const value = useMemo(() => ({ socket, userId }), [socket, userId])
+  const value = useMemo(() => ({ socket, userId, onlineUserIds }), [socket, userId, onlineUserIds])
   return <RealtimeContext.Provider value={value}>{children}</RealtimeContext.Provider>
 }

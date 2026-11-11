@@ -2,12 +2,14 @@ import './message.css'
 import { Link } from 'react-router-dom'
 import { useCallback, useEffect, useState } from 'react'
 import { apiRequest, getMediaUrl } from '../../api'
+import { useRealtime } from '../../realtime/useRealtime'
 
 // FontAwesome Icon.........
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEdit, faSearch } from '@fortawesome/free-solid-svg-icons'
 
 export default function Message () {
+  const { onlineUserIds } = useRealtime()
   const [friends, setFriends] = useState([])
   const [search, setSearch] = useState('')
   const [error, setError] = useState('')
@@ -55,10 +57,11 @@ export default function Message () {
           <div className='message'>
             <div className="user">
               {friend.avatar && <img src={getMediaUrl(friend.avatar)} alt="" />}
+              {onlineUserIds.has(friend.id) && <span className='green-active' aria-label='Online' title='Online' />}
             </div>
             <div className="message-body">
               <h5>{friend.name}</h5>
-              <p>Open conversation</p>
+              <p>{onlineUserIds.has(friend.id) ? 'Online' : 'Open conversation'}</p>
             </div>
           </div>
         </Link>

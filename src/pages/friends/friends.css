@@ -97,16 +97,39 @@
   text-decoration: none;
 }
 
+.friend-avatar-wrap {
+  position: relative;
+  display: block;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+}
+
+.friend-avatar-wrap .friend-avatar-fallback {
+  width: 100%;
+  height: 100%;
+}
+
+.friend-online-indicator {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--color-card);
+  border-radius: 50%;
+  background: #22c55e;
+}
+
 .friend-card .user h3 {
   overflow-wrap: anywhere;
   font-size: 1rem;
 }
 
-.friend-card .user img,
-.friend-avatar-fallback {
-  width: 44px;
-  height: 44px;
-  flex: 0 0 44px;
+.friend-avatar-wrap > img,
+.friend-avatar-wrap > .friend-avatar-fallback {
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
 }
 
