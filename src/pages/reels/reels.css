@@ -39,6 +39,29 @@
   white-space: nowrap;
 }
 
+.reels-feed-tabs {
+  display: flex;
+  width: min(100%, 620px);
+  gap: .5rem;
+  border-bottom: 1px solid var(--color-border, #ddd);
+}
+
+.reels-feed-tabs button {
+  padding: .65rem .9rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--color-soft);
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.reels-feed-tabs button.is-active {
+  border-bottom-color: #6c63ff;
+  color: var(--color-primary);
+}
+
 .reels-list {
   display: grid;
   width: min(100%, 620px);
@@ -126,6 +149,10 @@
   color: #ff5b78;
 }
 
+.reel-actions button.is-saved {
+  color: #a99fff;
+}
+
 .reel-actions button span {
   font-size: .75rem;
 }
@@ -159,6 +186,7 @@
 
 @media (max-width: 600px) {
   .reels-header,
+  .reels-feed-tabs,
   .reels-list {
     width: 100%;
   }

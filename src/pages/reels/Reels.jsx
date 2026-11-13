@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faComment, faHeart } from '@fortawesome/free-solid-svg-icons'
+import { faBookmark, faComment, faHeart } from '@fortawesome/free-solid-svg-icons'
 import { useAuth } from '../../auth/useAuth'
 import { apiRequest, getMediaUrl } from '../../api'
 import Comments from '../../components/comments/Comments'
@@ -16,39 +16,70 @@ export default function Reels() {
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(false)
   const [openComments, setOpenComments] = useState('')
+  const [feed, setFeed] = useState('for-you')
+  const loadRequestRef = useRef(0)
 
   const loadReels = useCallback(async () => {
+    const requestId = ++loadRequestRef.current
+    setLoading(true)
+    setLoadingMore(false)
+    setReels([])
+    setHasMore(false)
+    setError('')
     try {
-      const { reels: loadedReels } = await apiRequest('/posts/reels?page=1')
+      const { reels: loadedReels } = await apiRequest(`/posts/reels?page=1&feed=${feed}`)
+      if (requestId !== loadRequestRef.current) return
       setReels(loadedReels)
       setPage(1)
       setHasMore(loadedReels.length === 10)
       setError('')
     } catch (requestError) {
+      if (requestId !== loadRequestRef.current) return
       setError(requestError.message)
     } finally {
-      setLoading(false)
+      if (requestId === loadRequestRef.current) setLoading(false)
     }
-  }, [])
+  }, [feed])
 
   useEffect(() => {
     loadReels()
     window.addEventListener('posts:updated', loadReels)
-    return () => window.removeEventListener('posts:updated', loadReels)
+    return () => {
+      loadRequestRef.current += 1
+      window.removeEventListener('posts:updated', loadReels)
+    }
   }, [loadReels])
 
   async function loadMore() {
+    const requestId = loadRequestRef.current
     setLoadingMore(true)
     setError('')
     try {
-      const { reels: nextReels } = await apiRequest(`/posts/reels?page=${page + 1}`)
+      const { reels: nextReels } = await apiRequest(`/posts/reels?page=${page + 1}&feed=${feed}`)
+      if (requestId !== loadRequestRef.current) return
       setReels((current) => [...current, ...nextReels])
       setPage((current) => current + 1)
       setHasMore(nextReels.length === 10)
     } catch (requestError) {
+      if (requestId !== loadRequestRef.current) return
       setError(requestError.message)
     } finally {
-      setLoadingMore(false)
+      if (requestId === loadRequestRef.current) setLoadingMore(false)
+    }
+  }
+
+  async function toggleSave(reelId) {
+    try {
+      const { saved } = await apiRequest(`/posts/${reelId}/save`, { method: 'POST' })
+      if (feed === 'saved' && !saved) {
+        setReels((current) => current.filter((reel) => reel.id !== reelId))
+        return
+      }
+      setReels((current) => current.map((reel) => (
+        reel.id === reelId ? { ...reel, isSaved: saved } : reel
+      )))
+    } catch (requestError) {
+      setError(requestError.message)
     }
   }
 
@@ -92,10 +123,33 @@ export default function Reels() {
         </div>
         <Link className='reels-create-link' to='/?create=reel'>Create a Reel</Link>
       </header>
+      <div className='reels-feed-tabs' role='group' aria-label='Reels feeds'>
+        {[
+          ['for-you', 'For You'],
+          ['following', 'Following'],
+          ['saved', 'Saved'],
+        ].map(([feedId, label]) => (
+          <button
+            type='button'
+            aria-pressed={feed === feedId}
+            className={feed === feedId ? 'is-active' : ''}
+            key={feedId}
+            onClick={() => setFeed(feedId)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
       {error && <p className='reels-error' role='alert'>{error}</p>}
       {loading && <p role='status'>Loading reels...</p>}
       {!loading && !reels.length && !error && (
-        <p className='reels-empty'>No reels yet. Share a video from your feed to get started.</p>
+        <p className='reels-empty'>
+          {feed === 'saved'
+            ? 'You have not saved any Reels yet.'
+            : feed === 'following'
+              ? 'People you follow have not shared any Reels yet.'
+              : 'No reels yet. Share a video from your feed to get started.'}
+        </p>
       )}
       <div className='reels-list'>
         {reels.map((reel) => {
@@ -139,6 +193,16 @@ export default function Reels() {
                 >
                   <FontAwesomeIcon icon={faComment} />
                   <span>{reel.comments?.length ?? 0}</span>
+                </button>
+                <button
+                  type='button'
+                  className={reel.isSaved ? 'is-saved' : ''}
+                  onClick={() => toggleSave(reel.id)}
+                  aria-label={reel.isSaved ? 'Remove from saved reels' : 'Save reel'}
+                  aria-pressed={Boolean(reel.isSaved)}
+                >
+                  <FontAwesomeIcon icon={faBookmark} />
+                  <span>{reel.isSaved ? 'Saved' : 'Save'}</span>
                 </button>
               </div>
               {openComments === reel.id && (
