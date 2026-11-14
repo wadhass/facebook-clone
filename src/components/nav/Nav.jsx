@@ -10,7 +10,7 @@ import DarkMoode from '../darkmod/DarkMoode';
 
 // fontAwesome Icon
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope, faHome, faSearch, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faCompass, faEnvelope, faHome, faSearch, faUser } from '@fortawesome/free-solid-svg-icons';
 
 export default function Nav  () {
   const { user, signOut } = useAuth()
@@ -42,10 +42,13 @@ export default function Nav  () {
             <img src="/qavero.svg" alt="" className="brand-icon" />
             <h3 className='logo'>QAVERO</h3>
           </Link>
-          <Link to='/'>
+          <Link to='/' aria-label='Home'>
           <FontAwesomeIcon icon={faHome}/>
           </Link>
-          <Link to={`/profile/${user?.id ?? ''}`}>
+          <Link to='/explore' aria-label='Explore'>
+          <FontAwesomeIcon icon={faCompass}/>
+          </Link>
+          <Link to={`/profile/${user?.id ?? ''}`} aria-label='Profile'>
           <FontAwesomeIcon icon={faUser}/>
           </Link>
           <form className="nav-Serchbar" role='search' onSubmit={handleSearch}>
