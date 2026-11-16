@@ -53,6 +53,12 @@ export default function LeftBar  ()  {
           <h4>Reels</h4>
         </div>
       </Link>
+      <Link to='/live' aria-label='Live broadcasts'>
+        <div className='item'>
+          <span aria-hidden='true'>●</span>
+          <h4>Live</h4>
+        </div>
+      </Link>
       <Link to='/explore' aria-label='Explore'>
         <div className='item'>
           <span aria-hidden='true'>✦</span>

@@ -1,29 +1,37 @@
 .reels-page {
+  position: fixed;
+  z-index: 20;
+  inset: 3.6rem 0 0;
   display: grid;
-  justify-items: center;
-  gap: 1.25rem;
-  padding-bottom: 2rem;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  overflow: hidden;
+  padding: 0 1rem 1rem;
+  background: #101116;
+  color: #fff;
 }
 
 .reels-header {
   display: flex;
-  width: min(100%, 620px);
+  width: min(100%, 980px);
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  margin: 0 auto;
+  padding: .8rem 0;
 }
 
 .reels-header h1 {
-  margin: .25rem 0;
+  margin: .15rem 0;
+  color: #fff;
 }
 
 .reels-header p {
   margin: 0;
-  color: var(--color-soft);
+  color: #c3c4cc;
 }
 
 .reels-eyebrow {
-  color: #6c63ff;
+  color: #a99fff;
   font-size: .72rem;
   font-weight: 700;
   letter-spacing: .12em;
@@ -41,9 +49,10 @@
 
 .reels-feed-tabs {
   display: flex;
-  width: min(100%, 620px);
+  width: min(100%, 980px);
   gap: .5rem;
-  border-bottom: 1px solid var(--color-border, #ddd);
+  margin: 0 auto;
+  border-bottom: 1px solid rgba(255, 255, 255, .18);
 }
 
 .reels-feed-tabs button {
@@ -51,40 +60,88 @@
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
-  color: var(--color-soft);
+  color: #c3c4cc;
   font: inherit;
   font-weight: 650;
   cursor: pointer;
 }
 
 .reels-feed-tabs button.is-active {
-  border-bottom-color: #6c63ff;
-  color: var(--color-primary);
+  border-bottom-color: #a99fff;
+  color: #fff;
 }
 
 .reels-list {
-  display: grid;
-  width: min(100%, 620px);
-  gap: 1.5rem;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+}
+
+.reels-list::-webkit-scrollbar {
+  display: none;
 }
 
 .reel-card {
   position: relative;
-  min-height: min(75vh, 760px);
+  width: min(100%, 460px);
+  height: 100%;
+  min-height: 100%;
   overflow: hidden;
+  margin: 0 auto;
   border-radius: 1rem;
-  background: #111;
+  background: #08090c;
   color: white;
   isolation: isolate;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.reel-card::after {
+  position: absolute;
+  z-index: 0;
+  inset: 45% 0 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, .72));
+  content: '';
+  pointer-events: none;
 }
 
 .reel-card > video {
   display: block;
   width: 100%;
-  height: min(75vh, 760px);
-  min-height: 440px;
-  object-fit: contain;
-  background: #111;
+  height: 100%;
+  object-fit: cover;
+  background: #08090c;
+}
+
+.reel-play-toggle {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  width: 3.5rem;
+  height: 3.5rem;
+  place-items: center;
+  transform: translate(-50%, -50%);
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .5);
+  color: #fff;
+  font-size: 1.2rem;
+  opacity: .8;
+  cursor: pointer;
+}
+
+.reel-play-toggle.is-playing {
+  opacity: 0;
+}
+
+.reel-card:hover .reel-play-toggle.is-playing,
+.reel-play-toggle:focus-visible {
+  opacity: .8;
 }
 
 .reel-caption {
@@ -120,6 +177,7 @@
 
 .reel-caption p {
   margin: .55rem 0 0;
+  color: white;
   white-space: pre-wrap;
 }
 
@@ -129,7 +187,7 @@
   bottom: 1.3rem;
   z-index: 2;
   display: grid;
-  gap: .8rem;
+  gap: .65rem;
 }
 
 .reel-actions button {
@@ -140,7 +198,7 @@
   padding: .45rem;
   border: 0;
   border-radius: 2rem;
-  background: rgba(0, 0, 0, .4);
+  background: rgba(0, 0, 0, .48);
   color: white;
   cursor: pointer;
 }
@@ -150,11 +208,11 @@
 }
 
 .reel-actions button.is-saved {
-  color: #a99fff;
+  color: #c1baff;
 }
 
 .reel-actions button span {
-  font-size: .75rem;
+  font-size: .7rem;
 }
 
 .reel-comments {
@@ -171,33 +229,86 @@
   color: var(--color-primary);
 }
 
-.reels-empty {
-  padding: 2rem;
+.reels-empty,
+.reels-error,
+.reels-notice,
+.reels-page > p[role='status'] {
+  position: absolute;
+  z-index: 4;
+  top: 50%;
+  left: 50%;
+  width: min(90%, 32rem);
+  transform: translate(-50%, -50%);
+  padding: 1rem;
+  border-radius: .75rem;
+  background: rgba(0, 0, 0, .72);
+  color: white;
   text-align: center;
 }
 
 .reels-error {
-  color: #b83249;
+  background: #641e2a;
+}
+
+.reels-notice {
+  top: auto;
+  bottom: 1rem;
 }
 
 .reels-load-more {
-  margin: 0 auto;
+  display: block;
+  margin: 1rem auto;
+  scroll-snap-align: end;
+}
+
+@media (max-width: 991px) {
+  .reels-page {
+    bottom: calc(3.75rem + env(safe-area-inset-bottom));
+  }
 }
 
 @media (max-width: 600px) {
+  .reels-page {
+    padding: 0 .4rem .4rem;
+  }
+
   .reels-header,
-  .reels-feed-tabs,
-  .reels-list {
+  .reels-feed-tabs {
     width: 100%;
   }
 
-  .reel-card {
-    min-height: min(72vh, 700px);
-    border-radius: .75rem;
+  .reels-header {
+    padding: .55rem .35rem;
   }
 
-  .reel-card > video {
-    height: min(72vh, 700px);
-    min-height: 400px;
+  .reels-header p {
+    font-size: .85rem;
+  }
+
+  .reels-create-link {
+    padding: .55rem .7rem;
+    font-size: .85rem;
+  }
+
+  .reels-feed-tabs button {
+    padding: .55rem .75rem;
+  }
+
+  .reel-card {
+    border-radius: .55rem;
+  }
+
+  .reel-actions {
+    right: .45rem;
+    bottom: .8rem;
+  }
+
+  .reel-caption {
+    bottom: .9rem;
+    left: .75rem;
+  }
+
+  .reel-play-toggle.is-playing {
+    opacity: .45;
   }
 }

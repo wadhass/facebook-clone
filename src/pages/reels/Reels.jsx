@@ -1,7 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBookmark, faComment, faHeart } from '@fortawesome/free-solid-svg-icons'
+import {
+  faBookmark,
+  faComment,
+  faHeart,
+  faPause,
+  faPlay,
+  faShare,
+  faVolumeHigh,
+  faVolumeXmark,
+} from '@fortawesome/free-solid-svg-icons'
 import { useAuth } from '../../auth/useAuth'
 import { apiRequest, getMediaUrl } from '../../api'
 import Comments from '../../components/comments/Comments'
@@ -9,6 +18,8 @@ import './reels.css'
 
 export default function Reels() {
   const { user } = useAuth()
+  const feedRef = useRef(null)
+  const videoRefs = useRef(new Map())
   const [reels, setReels] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
@@ -17,6 +28,10 @@ export default function Reels() {
   const [hasMore, setHasMore] = useState(false)
   const [openComments, setOpenComments] = useState('')
   const [feed, setFeed] = useState('for-you')
+  const [activeReel, setActiveReel] = useState('')
+  const [muted, setMuted] = useState(true)
+  const [playing, setPlaying] = useState(true)
+  const [notice, setNotice] = useState('')
   const loadRequestRef = useRef(0)
 
   const loadReels = useCallback(async () => {
@@ -49,6 +64,68 @@ export default function Reels() {
       window.removeEventListener('posts:updated', loadReels)
     }
   }, [loadReels])
+
+  useEffect(() => {
+    const container = feedRef.current
+    if (!container || !reels.length) return undefined
+
+    const observer = new IntersectionObserver((entries) => {
+      const mostVisible = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
+      if (mostVisible) setActiveReel(mostVisible.target.dataset.reelId)
+    }, { root: container, threshold: [0.6, 0.8] })
+
+    container.querySelectorAll('[data-reel-id]').forEach((card) => observer.observe(card))
+    return () => observer.disconnect()
+  }, [reels])
+
+  useEffect(() => {
+    setPlaying(true)
+  }, [activeReel])
+
+  useEffect(() => {
+    if (!notice) return undefined
+    const timeoutId = window.setTimeout(() => setNotice(''), 2500)
+    return () => window.clearTimeout(timeoutId)
+  }, [notice])
+
+  useEffect(() => {
+    for (const [reelId, video] of videoRefs.current) {
+      if (reelId !== activeReel || !playing) {
+        video.pause()
+        continue
+      }
+
+      video.muted = muted
+      video.play().catch((playError) => {
+        if (playError.name !== 'AbortError' && playError.name !== 'NotAllowedError') {
+          console.error('Could not play reel video', playError)
+        }
+      })
+    }
+  }, [activeReel, muted, playing, reels])
+
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if (event.altKey || event.ctrlKey || event.metaKey || event.target.closest('input, textarea, button, a')) return
+      const direction = event.key === 'ArrowDown' || event.key === 'PageDown'
+        ? 1
+        : event.key === 'ArrowUp' || event.key === 'PageUp'
+          ? -1
+          : 0
+      if (!direction) return
+
+      event.preventDefault()
+      const cards = [...(feedRef.current?.querySelectorAll('[data-reel-id]') ?? [])]
+      const activeIndex = cards.findIndex((card) => card.dataset.reelId === activeReel)
+      const nextCard = cards[activeIndex + direction]
+      if (nextCard) nextCard.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [activeReel])
 
   async function loadMore() {
     const requestId = loadRequestRef.current
@@ -113,6 +190,28 @@ export default function Reels() {
     )))
   }
 
+  async function shareReel(reel) {
+    const url = `${window.location.origin}/reels`
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: `${reel.author.name}'s Reel`, url })
+      } else {
+        await navigator.clipboard.writeText(url)
+        setNotice('Reel link copied')
+      }
+    } catch (shareError) {
+      if (shareError.name !== 'AbortError') setError('Could not share this Reel')
+    }
+  }
+
+  function togglePlayback(reelId) {
+    if (activeReel === reelId) setPlaying((current) => !current)
+    else {
+      setActiveReel(reelId)
+      setPlaying(true)
+    }
+  }
+
   return (
     <section className='reels-page'>
       <header className='reels-header'>
@@ -141,6 +240,7 @@ export default function Reels() {
         ))}
       </div>
       {error && <p className='reels-error' role='alert'>{error}</p>}
+      {notice && <p className='reels-notice' role='status'>{notice}</p>}
       {loading && <p role='status'>Loading reels...</p>}
       {!loading && !reels.length && !error && (
         <p className='reels-empty'>
@@ -151,22 +251,40 @@ export default function Reels() {
               : 'No reels yet. Share a video from your feed to get started.'}
         </p>
       )}
-      <div className='reels-list'>
+      <div className='reels-list' ref={feedRef} aria-label='Reels video feed'>
         {reels.map((reel) => {
           const liked = reel.likes?.some((like) => (
             typeof like === 'string' ? like === user?.id : like.id === user?.id
           ))
           return (
-            <article className='reel-card' key={reel.id}>
+              <article className='reel-card' key={reel.id} data-reel-id={reel.id}>
               <video
                 src={getMediaUrl(reel.mediaUrl)}
-                controls
                 playsInline
-                muted
+                  muted={muted}
                 loop
                 preload='metadata'
                 aria-label={`Reel by ${reel.author.name}`}
+                  ref={(video) => {
+                    if (video) videoRefs.current.set(reel.id, video)
+                    else videoRefs.current.delete(reel.id)
+                  }}
+                  onClick={() => togglePlayback(reel.id)}
+                  onPlay={() => {
+                    if (activeReel === reel.id) setPlaying(true)
+                  }}
+                  onPause={() => {
+                    if (activeReel === reel.id) setPlaying(false)
+                  }}
               />
+                <button
+                  type='button'
+                  className={`reel-play-toggle${playing && activeReel === reel.id ? ' is-playing' : ''}`}
+                  onClick={() => togglePlayback(reel.id)}
+                  aria-label={playing && activeReel === reel.id ? 'Pause reel' : 'Play reel'}
+                >
+                  <FontAwesomeIcon icon={playing && activeReel === reel.id ? faPause : faPlay} />
+                </button>
               <div className='reel-caption'>
                 <Link to={`/profile/${reel.author.id}`}>
                   {reel.author.avatar
@@ -177,6 +295,15 @@ export default function Reels() {
                 {reel.text && <p>{reel.text}</p>}
               </div>
               <div className='reel-actions'>
+                <button
+                  type='button'
+                  onClick={() => setMuted((current) => !current)}
+                  aria-label={muted ? 'Turn sound on' : 'Mute reel'}
+                  aria-pressed={!muted}
+                >
+                  <FontAwesomeIcon icon={muted ? faVolumeXmark : faVolumeHigh} />
+                  <span>{muted ? 'Sound off' : 'Sound on'}</span>
+                </button>
                 <button
                   type='button'
                   className={liked ? 'is-liked' : ''}
@@ -204,6 +331,10 @@ export default function Reels() {
                   <FontAwesomeIcon icon={faBookmark} />
                   <span>{reel.isSaved ? 'Saved' : 'Save'}</span>
                 </button>
+                <button type='button' onClick={() => shareReel(reel)} aria-label='Share reel'>
+                  <FontAwesomeIcon icon={faShare} />
+                  <span>Share</span>
+                </button>
               </div>
               {openComments === reel.id && (
                 <div className='reel-comments'>
@@ -213,12 +344,12 @@ export default function Reels() {
             </article>
           )
         })}
+        {hasMore && (
+          <button type='button' className='btn btn-primary reels-load-more' onClick={loadMore} disabled={loadingMore}>
+            {loadingMore ? 'Loading...' : 'Load more reels'}
+          </button>
+        )}
       </div>
-      {hasMore && (
-        <button type='button' className='btn btn-primary reels-load-more' onClick={loadMore} disabled={loadingMore}>
-          {loadingMore ? 'Loading...' : 'Load more reels'}
-        </button>
-      )}
     </section>
   )
 }

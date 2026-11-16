@@ -60,6 +60,10 @@ const router = createBrowserRouter([
       { path: 'groups/:id', element: <GroupChat /> },
       { path: 'calls', element: <Calls /> },
       { path: 'reels', element: <Reels /> },
+      {
+        path: 'live',
+        lazy: async () => ({ Component: (await import('../pages/live/Live')).default }),
+      },
       { path: 'explore', element: <Explore /> },
     ],
   },

@@ -1,0 +1,415 @@
+.live-page {
+  display: grid;
+  gap: 1.25rem;
+  padding: .5rem 0 2rem;
+}
+
+.live-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.live-header h1 {
+  margin: .25rem 0;
+  color: var(--text-color);
+}
+
+.live-header p {
+  color: var(--color-soft);
+}
+
+.live-eyebrow {
+  color: #ef476f;
+  font-size: .72rem;
+  font-weight: 750;
+  letter-spacing: .12em;
+}
+
+.live-status {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  color: #e63957;
+  font-size: .85rem;
+  font-weight: 700;
+}
+
+.live-status-dot,
+.live-stage-badge span {
+  width: .55rem;
+  height: .55rem;
+  border-radius: 50%;
+  background: #e63957;
+}
+
+.live-error {
+  padding: .85rem 1rem;
+  border-radius: .65rem;
+  background: #ffe8ec;
+  color: #a51f39;
+}
+
+.live-discover {
+  display: grid;
+  grid-template-columns: minmax(240px, .75fr) minmax(0, 1.25fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.live-start-form,
+.live-list-section,
+.live-chat {
+  padding: 1.2rem;
+  border: 1px solid var(--color-border);
+  border-radius: .9rem;
+  background: var(--color-card);
+}
+
+.live-start-form {
+  display: grid;
+  gap: .75rem;
+}
+
+.live-start-form h2,
+.live-list-section h2,
+.live-chat h2 {
+  color: var(--text-color);
+  font-size: 1.1rem;
+}
+
+.live-start-form label {
+  color: var(--color-soft);
+  font-size: .9rem;
+}
+
+.live-start-form input,
+.live-chat-form input {
+  width: 100%;
+  padding: .75rem;
+  border: 1px solid var(--color-border);
+  border-radius: .55rem;
+  background: var(--color-bg);
+  color: var(--text-color);
+  font: inherit;
+}
+
+.live-start-form button,
+.live-stream-card > button,
+.live-chat-form button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: .7rem .9rem;
+  border: 0;
+  border-radius: .55rem;
+  background: #e63957;
+  color: #fff;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.live-start-form button:disabled,
+.live-stream-card > button:disabled,
+.live-chat-form button:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.live-start-form p,
+.live-host-tip {
+  font-size: .82rem;
+}
+
+.live-list-section {
+  display: grid;
+  gap: .9rem;
+}
+
+.live-stream-list {
+  display: grid;
+  gap: .7rem;
+}
+
+.live-stream-card {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .75rem;
+  border-radius: .65rem;
+  background: var(--color-bg);
+}
+
+.live-stream-avatar {
+  display: grid;
+  width: 2.8rem;
+  height: 2.8rem;
+  flex: 0 0 auto;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #e63957;
+  color: white;
+  font-weight: 700;
+}
+
+.live-stream-avatar img {
+  width: 100%;
+  height: 100%;
+}
+
+.live-stream-info {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: .1rem;
+  color: var(--color-soft);
+  font-size: .85rem;
+}
+
+.live-stream-info strong {
+  overflow: hidden;
+  color: var(--text-color);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.live-stream-info small {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+}
+
+.live-stream-card > button {
+  flex: 0 0 auto;
+  background: #6c63ff;
+}
+
+.live-room {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+  gap: 1rem;
+  min-height: min(70vh, 680px);
+}
+
+.live-stage-column {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: .5rem;
+  min-height: 0;
+}
+
+.live-stage {
+  position: relative;
+  min-height: 420px;
+  overflow: hidden;
+  border-radius: .9rem;
+  background: #090a0d;
+}
+
+.live-stage video.live-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  object-fit: contain;
+  background: #090a0d;
+}
+
+.live-stage-badge,
+.live-viewer-count {
+  position: absolute;
+  z-index: 1;
+  top: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .45rem .65rem;
+  border-radius: 2rem;
+  background: rgba(0, 0, 0, .66);
+  color: white;
+  font-size: .8rem;
+  font-weight: 700;
+}
+
+.live-stage-badge {
+  left: 1rem;
+}
+
+.live-viewer-count {
+  right: 1rem;
+  font-weight: 500;
+}
+
+.live-stage-details {
+  position: absolute;
+  z-index: 1;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  display: grid;
+  gap: .15rem;
+  color: white;
+  text-shadow: 0 1px 5px #000;
+}
+
+.live-stage-details strong {
+  font-size: 1.1rem;
+}
+
+.live-leave-button {
+  position: absolute;
+  z-index: 2;
+  right: 1rem;
+  bottom: 4.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .65rem .85rem;
+  border: 0;
+  border-radius: 2rem;
+  background: #e63957;
+  color: white;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.live-leave-button:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.live-host-controls {
+  position: absolute;
+  z-index: 2;
+  bottom: 4.5rem;
+  left: 1rem;
+  display: flex;
+  gap: .55rem;
+}
+
+.live-host-controls button {
+  display: grid;
+  width: 2.8rem;
+  height: 2.8rem;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .66);
+  color: white;
+  cursor: pointer;
+}
+
+.live-waiting {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  text-align: center;
+}
+
+.live-audio-tracks {
+  display: none;
+}
+
+.live-host-tip {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+
+.live-chat {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 0;
+  gap: .75rem;
+}
+
+.live-chat h2 {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.live-chat-messages {
+  display: flex;
+  min-height: 220px;
+  flex-direction: column;
+  gap: .65rem;
+  overflow-y: auto;
+}
+
+.live-chat-message {
+  overflow-wrap: anywhere;
+  color: var(--text-color);
+  font-size: .9rem;
+}
+
+.live-chat-message strong {
+  color: #6c63ff;
+}
+
+.live-chat-empty {
+  margin: auto;
+  text-align: center;
+}
+
+.live-chat-form {
+  display: flex;
+  gap: .45rem;
+}
+
+.live-chat-form input {
+  min-width: 0;
+}
+
+.live-chat-form button {
+  flex: 0 0 auto;
+  background: #6c63ff;
+}
+
+@media (max-width: 760px) {
+  .live-discover,
+  .live-room {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .live-room {
+    min-height: 0;
+  }
+
+  .live-stage {
+    min-height: min(62vh, 560px);
+  }
+
+  .live-stage video.live-video {
+    min-height: min(62vh, 560px);
+  }
+
+  .live-chat {
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .live-stream-card {
+    flex-wrap: wrap;
+  }
+
+  .live-stream-info {
+    min-width: calc(100% - 4rem);
+  }
+
+  .live-stream-card > button {
+    width: 100%;
+  }
+
+  .live-chat-form {
+    flex-direction: column;
+  }
+}
