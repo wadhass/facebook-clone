@@ -14,10 +14,12 @@ import {
 import { useAuth } from '../../auth/useAuth'
 import { apiRequest, getMediaUrl } from '../../api'
 import Comments from '../../components/comments/Comments'
+import { usePreferences } from '../../preferences/usePreferences'
 import './reels.css'
 
 export default function Reels() {
   const { user } = useAuth()
+  const { lowData, t } = usePreferences()
   const feedRef = useRef(null)
   const videoRefs = useRef(new Map())
   const [reels, setReels] = useState([])
@@ -30,7 +32,7 @@ export default function Reels() {
   const [feed, setFeed] = useState('for-you')
   const [activeReel, setActiveReel] = useState('')
   const [muted, setMuted] = useState(true)
-  const [playing, setPlaying] = useState(true)
+  const [playing, setPlaying] = useState(() => !lowData)
   const [notice, setNotice] = useState('')
   const loadRequestRef = useRef(0)
 
@@ -81,8 +83,8 @@ export default function Reels() {
   }, [reels])
 
   useEffect(() => {
-    setPlaying(true)
-  }, [activeReel])
+    setPlaying(!lowData)
+  }, [lowData])
 
   useEffect(() => {
     if (!notice) return undefined
@@ -197,10 +199,10 @@ export default function Reels() {
         await navigator.share({ title: `${reel.author.name}'s Reel`, url })
       } else {
         await navigator.clipboard.writeText(url)
-        setNotice('Reel link copied')
+        setNotice(t('Reel link copied'))
       }
     } catch (shareError) {
-      if (shareError.name !== 'AbortError') setError('Could not share this Reel')
+      if (shareError.name !== 'AbortError') setError(t('Could not share this Reel'))
     }
   }
 
@@ -216,17 +218,17 @@ export default function Reels() {
     <section className='reels-page'>
       <header className='reels-header'>
         <div>
-          <span className='reels-eyebrow'>SHORT VIDEOS</span>
-          <h1>Reels</h1>
-          <p>Watch videos shared by your community.</p>
+          <span className='reels-eyebrow'>{t('SHORT VIDEOS')}</span>
+          <h1>{t('Reels')}</h1>
+          <p>{t('Watch videos shared by your community.')}</p>
         </div>
-        <Link className='reels-create-link' to='/?create=reel'>Create a Reel</Link>
+        <Link className='reels-create-link' to='/?create=reel'>{t('Create a Reel')}</Link>
       </header>
-      <div className='reels-feed-tabs' role='group' aria-label='Reels feeds'>
+        <div className='reels-feed-tabs' role='group' aria-label={t('Reels feeds')}>
         {[
-          ['for-you', 'For You'],
-          ['following', 'Following'],
-          ['saved', 'Saved'],
+            ['for-you', t('For You')],
+            ['following', t('Following')],
+            ['saved', t('Saved')],
         ].map(([feedId, label]) => (
           <button
             type='button'
@@ -241,14 +243,14 @@ export default function Reels() {
       </div>
       {error && <p className='reels-error' role='alert'>{error}</p>}
       {notice && <p className='reels-notice' role='status'>{notice}</p>}
-      {loading && <p role='status'>Loading reels...</p>}
+      {loading && <p role='status'>{t('Loading reels...')}</p>}
       {!loading && !reels.length && !error && (
         <p className='reels-empty'>
           {feed === 'saved'
-            ? 'You have not saved any Reels yet.'
+            ? t('You have not saved any Reels yet.')
             : feed === 'following'
-              ? 'People you follow have not shared any Reels yet.'
-              : 'No reels yet. Share a video from your feed to get started.'}
+              ? t('People you follow have not shared any Reels yet.')
+              : t('No reels yet. Share a video from your feed to get started.')}
         </p>
       )}
       <div className='reels-list' ref={feedRef} aria-label='Reels video feed'>
@@ -263,8 +265,8 @@ export default function Reels() {
                 playsInline
                   muted={muted}
                 loop
-                preload='metadata'
-                aria-label={`Reel by ${reel.author.name}`}
+                preload={lowData ? 'none' : 'metadata'}
+                aria-label={`${t('Reel by')} ${reel.author.name}`}
                   ref={(video) => {
                     if (video) videoRefs.current.set(reel.id, video)
                     else videoRefs.current.delete(reel.id)
@@ -281,7 +283,7 @@ export default function Reels() {
                   type='button'
                   className={`reel-play-toggle${playing && activeReel === reel.id ? ' is-playing' : ''}`}
                   onClick={() => togglePlayback(reel.id)}
-                  aria-label={playing && activeReel === reel.id ? 'Pause reel' : 'Play reel'}
+                  aria-label={t(playing && activeReel === reel.id ? 'Pause reel' : 'Play reel')}
                 >
                   <FontAwesomeIcon icon={playing && activeReel === reel.id ? faPause : faPlay} />
                 </button>
@@ -298,17 +300,17 @@ export default function Reels() {
                 <button
                   type='button'
                   onClick={() => setMuted((current) => !current)}
-                  aria-label={muted ? 'Turn sound on' : 'Mute reel'}
+                  aria-label={t(muted ? 'Turn sound on' : 'Mute reel')}
                   aria-pressed={!muted}
                 >
                   <FontAwesomeIcon icon={muted ? faVolumeXmark : faVolumeHigh} />
-                  <span>{muted ? 'Sound off' : 'Sound on'}</span>
+                  <span>{t(muted ? 'Sound off' : 'Sound on')}</span>
                 </button>
                 <button
                   type='button'
                   className={liked ? 'is-liked' : ''}
                   onClick={() => toggleLike(reel.id)}
-                  aria-label={liked ? 'Unlike reel' : 'Like reel'}
+                  aria-label={t(liked ? 'Unlike reel' : 'Like reel')}
                 >
                   <FontAwesomeIcon icon={faHeart} />
                   <span>{reel.likes?.length ?? 0}</span>
@@ -316,7 +318,7 @@ export default function Reels() {
                 <button
                   type='button'
                   onClick={() => setOpenComments((current) => current === reel.id ? '' : reel.id)}
-                  aria-label='Show comments'
+                  aria-label={t('Show comments')}
                 >
                   <FontAwesomeIcon icon={faComment} />
                   <span>{reel.comments?.length ?? 0}</span>
@@ -325,15 +327,15 @@ export default function Reels() {
                   type='button'
                   className={reel.isSaved ? 'is-saved' : ''}
                   onClick={() => toggleSave(reel.id)}
-                  aria-label={reel.isSaved ? 'Remove from saved reels' : 'Save reel'}
+                  aria-label={t(reel.isSaved ? 'Remove from saved reels' : 'Save reel')}
                   aria-pressed={Boolean(reel.isSaved)}
                 >
                   <FontAwesomeIcon icon={faBookmark} />
-                  <span>{reel.isSaved ? 'Saved' : 'Save'}</span>
+                  <span>{reel.isSaved ? t('Saved') : t('Save')}</span>
                 </button>
-                <button type='button' onClick={() => shareReel(reel)} aria-label='Share reel'>
+                <button type='button' onClick={() => shareReel(reel)} aria-label={t('Share reel')}>
                   <FontAwesomeIcon icon={faShare} />
-                  <span>Share</span>
+                  <span>{t('Share')}</span>
                 </button>
               </div>
               {openComments === reel.id && (
@@ -346,7 +348,7 @@ export default function Reels() {
         })}
         {hasMore && (
           <button type='button' className='btn btn-primary reels-load-more' onClick={loadMore} disabled={loadingMore}>
-            {loadingMore ? 'Loading...' : 'Load more reels'}
+            {loadingMore ? t('Loading...') : t('Load more reels')}
           </button>
         )}
       </div>

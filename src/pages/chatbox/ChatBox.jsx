@@ -6,6 +6,7 @@ import { apiRequest, getAuthToken, getMediaUrl } from '../../api'
 import { useAuth } from '../../auth/useAuth'
 import { useRealtime } from '../../realtime/useRealtime'
 import { useCalls } from '../../calls/useCalls'
+import { usePreferences } from '../../preferences/usePreferences'
 
 // Font Awesome icon.........
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -81,6 +82,7 @@ export default function ChatBox () {
   const { user } = useAuth()
   const { socket } = useRealtime()
   const { startCall, call: activeCall } = useCalls()
+  const { lowData } = usePreferences()
   const [friend, setFriend] = useState(null)
   const [canCall, setCanCall] = useState(false)
   const [messages, setMessages] = useState([])
@@ -481,7 +483,7 @@ export default function ChatBox () {
               <img className='chat-attachment-image' src={getMediaUrl(message.mediaUrl)} alt={message.fileName || 'Image attachment'} />
             )}
             {message.mediaUrl && message.type === 'video' && (
-              <video className='chat-attachment-video' src={getMediaUrl(message.mediaUrl)} controls preload='metadata' />
+              <video className='chat-attachment-video' src={getMediaUrl(message.mediaUrl)} controls preload={lowData ? 'none' : 'metadata'} />
             )}
             {message.mediaUrl && message.type === 'audio' && (
               <VoiceAttachment mediaUrl={getMediaUrl(message.mediaUrl)} />

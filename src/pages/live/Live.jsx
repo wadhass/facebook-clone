@@ -11,6 +11,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { useAuth } from '../../auth/useAuth'
 import { apiRequest, getMediaUrl } from '../../api'
+import { usePreferences } from '../../preferences/usePreferences'
 import './live.css'
 
 const chatTopic = 'qavero-live-chat'
@@ -18,6 +19,7 @@ const maxChatLength = 500
 
 export default function Live() {
   const { user } = useAuth()
+  const { lowData, t } = usePreferences()
   const [streams, setStreams] = useState([])
   const [activeStream, setActiveStream] = useState(null)
   const [videoTrack, setVideoTrack] = useState(null)
@@ -64,6 +66,35 @@ export default function Live() {
     return () => videoTrack.detach(videoElement)
   }, [videoTrack])
 
+  useEffect(() => {
+    const room = roomRef.current
+    if (!room) return undefined
+
+    let cancelled = false
+    import('livekit-client')
+      .then(({ VideoQuality }) => {
+        if (cancelled || roomRef.current !== room) return
+        const quality = lowData ? VideoQuality.LOW : VideoQuality.HIGH
+        for (const participant of room.remoteParticipants.values()) {
+          for (const publication of participant.trackPublications.values()) {
+            if (publication.kind === 'video') publication.setVideoQuality(quality)
+          }
+        }
+        for (const publication of room.localParticipant.trackPublications.values()) {
+          if (publication.kind === 'video' && typeof publication.track?.setPublishingQuality === 'function') {
+            publication.track.setPublishingQuality(quality)
+          }
+        }
+      })
+      .catch((qualityError) => {
+        if (!cancelled) setError(qualityError.message || 'Could not adjust live video quality')
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [activeStream, lowData])
+
   const clearRoomState = useCallback(() => {
     window.clearInterval(heartbeatRef.current)
     heartbeatRef.current = null
@@ -93,8 +124,18 @@ export default function Live() {
   }, [])
 
   async function connectToStream(stream, url, token, isHost) {
-    const { Room, RoomEvent } = await import('livekit-client')
-    const room = new Room({ adaptiveStream: true, dynacast: true })
+    const { Room, RoomEvent, VideoPresets, VideoQuality } = await import('livekit-client')
+    const room = new Room({
+      adaptiveStream: true,
+      dynacast: true,
+      ...(lowData ? {
+        videoCaptureDefaults: { resolution: VideoPresets.h360.resolution },
+        publishDefaults: {
+          videoEncoding: VideoPresets.h360.encoding,
+          videoSimulcastLayers: [VideoPresets.h180],
+        },
+      } : {}),
+    })
     const streamDetails = { ...stream, isHost }
     roomRef.current = room
     streamRef.current = streamDetails
@@ -104,8 +145,9 @@ export default function Live() {
     setError('')
     setConnectionStatus('Connecting...')
 
-    room.on(RoomEvent.TrackSubscribed, (track) => {
+    room.on(RoomEvent.TrackSubscribed, (track, publication) => {
       if (track.kind === 'video') {
+        if (lowData) publication.setVideoQuality(VideoQuality.LOW)
         setVideoTrack(track)
       } else {
         const audioElement = track.attach()
@@ -294,8 +336,8 @@ export default function Live() {
       <header className='live-header'>
         <div>
           <span className='live-eyebrow'>QAVERO LIVE</span>
-          <h1>Live broadcasts</h1>
-          <p>Go live with your community or join a broadcast.</p>
+          <h1>{t('Live broadcasts')}</h1>
+          <p>{t('Go live with your community or join a broadcast.')}</p>
         </div>
         {activeStream && (
           <span className='live-status'>
@@ -332,13 +374,13 @@ export default function Live() {
                 className='live-leave-button'
                 onClick={leaveBroadcast}
                 disabled={busy}
-                aria-label={isHost ? 'End live stream' : 'Leave live stream'}
+                aria-label={isHost ? t('End live stream') : t('Leave live stream')}
               >
                 <FontAwesomeIcon icon={faPhoneSlash} />
-                {isHost ? 'End live' : 'Leave'}
+                  {isHost ? t('End live') : t('Leave')}
               </button>
-              {!isHost && !videoTrack && <p className='live-waiting'>Waiting for the host's video...</p>}
-              {isHost && !cameraEnabled && <p className='live-waiting'>Your camera is off.</p>}
+              {!isHost && !videoTrack && <p className='live-waiting'>{t("Waiting for the host's video...")}</p>}
+              {isHost && !cameraEnabled && <p className='live-waiting'>{t('Your camera is off.')}</p>}
               <div className='live-audio-tracks' ref={audioContainerRef} />
               {isHost && (
                 <div className='live-host-controls'>
@@ -351,11 +393,11 @@ export default function Live() {
                 </div>
               )}
             </div>
-            {isHost && <p className='live-host-tip'><FontAwesomeIcon icon={faVideo} /> Control your camera and microphone while you are live.</p>}
+            {isHost && <p className='live-host-tip'><FontAwesomeIcon icon={faVideo} /> {t('Control your camera and microphone while you are live.')}</p>}
           </div>
 
           <aside className='live-chat'>
-            <h2><FontAwesomeIcon icon={faComments} /> Live chat</h2>
+            <h2><FontAwesomeIcon icon={faComments} /> {t('Live chat')}</h2>
             <div className='live-chat-messages' aria-live='polite'>
               {!messages.length && <p className='live-chat-empty'>Say hello to the community.</p>}
               {messages.map((message) => (
@@ -368,39 +410,39 @@ export default function Live() {
               <input
                 value={messageText}
                 onChange={(event) => setMessageText(event.target.value)}
-                placeholder='Write a comment'
+                placeholder={t('Write a comment')}
                 maxLength={maxChatLength}
                 aria-label='Write a live comment'
                 disabled={busy}
               />
-              <button type='submit' disabled={!messageText.trim() || busy}>Send</button>
+              <button type='submit' disabled={!messageText.trim() || busy}>{t('Send')}</button>
             </form>
           </aside>
         </div>
       ) : (
         <div className='live-discover'>
           <form className='live-start-form' onSubmit={startBroadcast}>
-            <h2>Start a live broadcast</h2>
-            <label htmlFor='live-title'>What is your live about?</label>
+            <h2>{t('Start a live broadcast')}</h2>
+            <label htmlFor='live-title'>{t('What is your live about?')}</label>
             <input
               id='live-title'
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              placeholder='Add a title'
+              placeholder={t('Add a title')}
               maxLength={120}
               disabled={busy}
             />
             <button type='submit' disabled={busy}>
               <FontAwesomeIcon icon={faVideo} />
-              {busy ? 'Connecting...' : 'Go live'}
+              {busy ? t('Connecting...') : t('Go live')}
             </button>
-            <p>Starting a broadcast will ask for camera and microphone access.</p>
+            <p>{t('Starting a broadcast will ask for camera and microphone access.')}</p>
           </form>
 
           <div className='live-list-section'>
-            <h2>Happening now</h2>
-            {loading && <p role='status'>Loading live streams...</p>}
-            {!loading && !streams.length && !error && <p>No one is live right now. Start the first broadcast.</p>}
+            <h2>{t('Happening now')}</h2>
+            {loading && <p role='status'>{t('Loading live streams...')}</p>}
+            {!loading && !streams.length && !error && <p>{t('No one is live right now. Start the first broadcast.')}</p>}
             <div className='live-stream-list'>
               {streams.map((stream) => (
                 <article className='live-stream-card' key={stream.id}>
@@ -415,7 +457,7 @@ export default function Live() {
                     <small><FontAwesomeIcon icon={faEye} /> {stream.viewerCount} watching</small>
                   </div>
                   <button type='button' onClick={() => joinBroadcast(stream)} disabled={busy}>
-                    {stream.host.id === user?.id ? 'Return to live' : 'Watch live'}
+                    {stream.host.id === user?.id ? t('Return to live') : t('Watch live')}
                   </button>
                 </article>
               ))}

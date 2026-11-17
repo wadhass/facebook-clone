@@ -2,10 +2,12 @@ import './stories.css'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { apiRequest, getMediaUrl } from '../../api'
 import { useAuth } from '../../auth/useAuth'
+import { usePreferences } from '../../preferences/usePreferences'
 import UserStory from './UserStory'
 
 export default function Stories () {
   const { user } = useAuth()
+  const { lowData, t } = usePreferences()
   const [stories, setStories] = useState([])
   const [activeStory, setActiveStory] = useState(null)
   const [error, setError] = useState('')
@@ -35,25 +37,36 @@ export default function Stories () {
     return [...groups.values()]
   }, [stories])
 
-  async function addStory(file) {
+  async function addStories(files) {
     setError('')
-    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
-      setError('Choose an image or video file')
-      return
-    }
-    if (file.size > 50 * 1024 * 1024) {
-      setError('Media files must be 50 MB or smaller')
-      return
+    for (const file of files) {
+      if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+        setError('Choose image or video files')
+        return
+      }
+      if (file.size > 50 * 1024 * 1024) {
+        setError('Each story must be 50 MB or smaller')
+        return
+      }
     }
 
     setUploading(true)
+    let uploadedCount = 0
     try {
-      const formData = new FormData()
-      formData.append('media', file)
-      await apiRequest('/stories', { method: 'POST', body: formData })
+      for (const file of files) {
+        const formData = new FormData()
+        formData.append('media', file)
+        await apiRequest('/stories', { method: 'POST', body: formData })
+        uploadedCount += 1
+      }
       await loadStories()
     } catch (requestError) {
-      setError(requestError.message)
+      if (uploadedCount > 0) await loadStories()
+      setError(
+        uploadedCount > 0
+          ? `Uploaded ${uploadedCount} of ${files.length} stories. ${requestError.message}`
+          : requestError.message,
+      )
     } finally {
       setUploading(false)
     }
@@ -87,7 +100,7 @@ export default function Stories () {
 
   return (
     <div className='stories'>
-      <UserStory user={user} onCreate={addStory} uploading={uploading} />
+      <UserStory user={user} onCreate={addStories} uploading={uploading} />
       {storyGroups.map((group) => (
         <button
           type='button'
@@ -97,13 +110,14 @@ export default function Stories () {
           aria-label={`View ${group.author.name}'s stories`}
         >
           {group.stories[0].mediaType === 'video'
-            ? <video src={getMediaUrl(group.stories[0].mediaUrl)} muted />
-            : <img src={getMediaUrl(group.stories[0].mediaUrl)} alt='' />}
-          {group.author.avatar && <img className='story-avatar' src={getMediaUrl(group.author.avatar)} alt='' />}
+            ? <video src={getMediaUrl(group.stories[0].mediaUrl)} muted preload={lowData ? 'none' : 'metadata'} />
+            : <img src={getMediaUrl(group.stories[0].mediaUrl)} alt='' loading='lazy' />}
+          {group.author.avatar && <img className='story-avatar' src={getMediaUrl(group.author.avatar)} alt='' loading='lazy' />}
+          {group.stories.length > 1 && <span className='story-count'>{group.stories.length}</span>}
           <h5>{group.author.name}</h5>
         </button>
       ))}
-      {!storyGroups.length && !error && <p className='stories-empty'>No active stories yet.</p>}
+      {!storyGroups.length && !error && <p className='stories-empty'>{t('No active stories yet.')}</p>}
       {error && <p role='alert' className='stories-error'>{error}</p>}
 
       {currentStory && (
@@ -114,23 +128,23 @@ export default function Stories () {
             if (event.target === event.currentTarget) setActiveStory(null)
           }}
         >
-          <section className='story-viewer' role='dialog' aria-modal='true' aria-label='Story'>
+          <section className='story-viewer' role='dialog' aria-modal='true' aria-label={t('Story')}>
             <header>
               <span>{activeStory.group.author.name}</span>
-              <button type='button' onClick={() => setActiveStory(null)} aria-label='Close story'>×</button>
+              <button type='button' onClick={() => setActiveStory(null)} aria-label={t('Close story')}>×</button>
             </header>
             {currentStory.mediaType === 'video'
-              ? <video src={getMediaUrl(currentStory.mediaUrl)} controls autoPlay />
+              ? <video src={getMediaUrl(currentStory.mediaUrl)} controls autoPlay preload={lowData ? 'none' : 'metadata'} />
               : <img src={getMediaUrl(currentStory.mediaUrl)} alt={currentStory.text || 'Story'} />}
             {currentStory.text && <p>{currentStory.text}</p>}
             <footer>
               {activeStory.group.author.id === user?.id && (
                 <button type='button' className='btn btn-red' onClick={() => deleteStory(currentStory)}>
-                  Delete story
+                  {t('Delete story')}
                 </button>
               )}
               <button type='button' className='btn btn-primary' onClick={() => stepStory(1)}>
-                Next
+                {t('Next')}
               </button>
             </footer>
           </section>

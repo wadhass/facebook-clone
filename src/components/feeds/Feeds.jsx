@@ -3,8 +3,10 @@ import './feeds.css'
 import { useCallback, useEffect, useState } from 'react'
 import { apiRequest } from '../../api'
 import Feed from './Feed'
+import { usePreferences } from '../../preferences/usePreferences'
 
 export default function Feeds ({ authorId }) {
+  const { t } = usePreferences()
   const [posts, setPosts] = useState([])
   const [error, setError] = useState('')
   const [page, setPage] = useState(1)
@@ -52,11 +54,11 @@ export default function Feeds ({ authorId }) {
   return (
     <div className='feeds'>
       {error && <p role='alert'>{error}</p>}
-      {!error && posts.length === 0 && <p>No posts yet. Share something to get started.</p>}
+      {!error && posts.length === 0 && <p>{t('No posts yet. Share something to get started.')}</p>}
       {posts.map((post) => <Feed fed={post} key={post.id} />)}
       {hasMore && posts.length > 0 && (
         <button type='button' className='btn btn-primary' onClick={loadMore} disabled={loadingMore}>
-          {loadingMore ? 'Loading...' : 'Load older posts'}
+          {loadingMore ? t('Loading...') : t('Load older posts')}
         </button>
       )}
     </div>

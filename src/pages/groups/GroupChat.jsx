@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { apiRequest, getMediaUrl } from '../../api'
 import { useAuth } from '../../auth/useAuth'
 import { useRealtime } from '../../realtime/useRealtime'
+import { usePreferences } from '../../preferences/usePreferences'
 import './groups.css'
 
 function mergeMessages(current, incoming) {
@@ -17,6 +18,7 @@ export default function GroupChat() {
   const { id } = useParams()
   const { user } = useAuth()
   const { socket } = useRealtime()
+  const { lowData } = usePreferences()
   const [conversation, setConversation] = useState(null)
   const [messages, setMessages] = useState([])
   const [text, setText] = useState('')
@@ -177,7 +179,7 @@ export default function GroupChat() {
               <img src={getMediaUrl(message.mediaUrl)} alt={message.fileName || 'Group image'} />
             )}
             {message.mediaUrl && message.type === 'video' && (
-              <video src={getMediaUrl(message.mediaUrl)} controls preload='metadata' />
+              <video src={getMediaUrl(message.mediaUrl)} controls preload={lowData ? 'none' : 'metadata'} />
             )}
             {message.mediaUrl && message.type === 'audio' && (
               <audio src={getMediaUrl(message.mediaUrl)} controls preload='metadata' />

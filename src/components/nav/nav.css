@@ -60,6 +60,41 @@ nav{
     gap: 30px;
 }
 
+.nav-preferences{
+    position: relative;
+    color: var(--color-primary);
+}
+.nav-preferences > summary{
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    cursor: pointer;
+    list-style: none;
+}
+.nav-preferences > summary::-webkit-details-marker{
+    display: none;
+}
+.nav-preferences > .preference-controls{
+    position: absolute;
+    top: calc(100% + .65rem);
+    right: 0;
+    z-index: 20;
+    width: min(290px, calc(100vw - 24px));
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: .8rem;
+    background: var(--color-card);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, .18);
+}
+
+:root[dir='rtl'] .nav-preferences > .preference-controls{
+    right: auto;
+    left: 0;
+}
+
 .nav-Serchbar input {
     background: transparent;
     color: var(--text-color);
@@ -106,6 +141,13 @@ nav{
     }
     .nav-right{
         flex: 0 0 auto;
+    }
+    .nav-preferences > .preference-controls{
+        right: -42px;
+    }
+    :root[dir='rtl'] .nav-preferences > .preference-controls{
+        right: auto;
+        left: -42px;
     }
     .nav-right .btn{
         padding: .5rem .75rem;

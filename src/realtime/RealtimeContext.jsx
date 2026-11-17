@@ -15,7 +15,6 @@ export function RealtimeProvider({ userId, children }) {
 
     const connection = io(getRealtimeUrl(), {
       autoConnect: false,
-      transports: ['websocket'],
       auth: async (callback) => {
         try {
           callback({ token: await getAuthToken() })

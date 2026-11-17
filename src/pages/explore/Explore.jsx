@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { apiRequest, getMediaUrl } from '../../api'
+import { usePreferences } from '../../preferences/usePreferences'
 import './explore.css'
 
 export default function Explore() {
+  const { lowData, t } = usePreferences()
   const [posts, setPosts] = useState([])
   const [suggestions, setSuggestions] = useState([])
   const [loading, setLoading] = useState(true)
@@ -48,21 +50,21 @@ export default function Explore() {
     <section className='explore-page'>
       <header className='explore-header'>
         <div>
-          <span className='explore-eyebrow'>DISCOVER</span>
-          <h1>Explore</h1>
-          <p>Trending moments, creator picks, and fresh ideas from your community.</p>
+          <span className='explore-eyebrow'>{t('DISCOVER')}</span>
+          <h1>{t('Explore')}</h1>
+          <p>{t('Trending moments, creator picks, and fresh ideas from your community.')}</p>
         </div>
       </header>
 
       {error && <p className='explore-error' role='alert'>{error}</p>}
-      {loading && <p className='explore-status' role='status'>Loading the feed...</p>}
+      {loading && <p className='explore-status' role='status'>{t('Loading the feed...')}</p>}
 
       {!loading && !error && (
         <>
           <section className='explore-section'>
             <div className='section-heading'>
-              <h2>Trending now</h2>
-              <Link to='/reels'>See all reels</Link>
+              <h2>{t('Trending now')}</h2>
+              <Link to='/reels'>{t('See all reels')}</Link>
             </div>
             <div className='explore-trending-grid'>
               {trendingPosts.map((post) => {
@@ -72,19 +74,19 @@ export default function Explore() {
                 return (
                   <article className='explore-card trending-card' key={post.id}>
                     {preview && post.mediaType === 'video' ? (
-                      <video src={preview} muted playsInline loop />
+                      <video src={preview} muted playsInline loop preload={lowData ? 'none' : 'metadata'} />
                     ) : preview ? (
-                      <img src={preview} alt={post.text || 'Trending post'} />
+                      <img src={preview} alt={post.text || 'Trending post'} loading='lazy' />
                     ) : (
                       <div className='trending-copy-only'>
-                        <p>{post.text || 'Community update'}</p>
+                        <p>{post.text || t('Community update')}</p>
                       </div>
                     )}
                     <div className='explore-card-body'>
                       <span className='trend-score'>🔥 {score} buzz</span>
                       <h3>{post.author?.name || 'Qavero member'}</h3>
                       <p>{post.text || 'Fresh update from the community.'}</p>
-                      <Link to={`/profile/${post.author?.id ?? ''}`}>View profile</Link>
+                      <Link to={`/profile/${post.author?.id ?? ''}`}>{t('View profile')}</Link>
                     </div>
                   </article>
                 )
@@ -94,21 +96,21 @@ export default function Explore() {
 
           <section className='explore-section'>
             <div className='section-heading'>
-              <h2>Suggested creators</h2>
-              <Link to='/friends?tab=discover'>Meet more people</Link>
+              <h2>{t('Suggested creators')}</h2>
+              <Link to='/friends?tab=discover'>{t('Meet more people')}</Link>
             </div>
             <div className='creator-grid'>
               {featuredCreators.map((person) => (
                 <article className='explore-card creator-card' key={person.id}>
                   <Link to={`/profile/${person.id}`} className='creator-link'>
                     {person.avatar ? (
-                      <img src={getMediaUrl(person.avatar)} alt={person.name} className='creator-avatar' />
+                      <img src={getMediaUrl(person.avatar)} alt={person.name} loading='lazy' className='creator-avatar' />
                     ) : (
                       <span className='creator-avatar placeholder'>{person.name?.[0] ?? '?'}</span>
                     )}
                     <div>
                       <h3>{person.name}</h3>
-                      <small>Suggested for you</small>
+                      <small>{t('Suggested for you')}</small>
                     </div>
                   </Link>
                 </article>
@@ -118,15 +120,15 @@ export default function Explore() {
 
           <section className='explore-section'>
             <div className='section-heading'>
-              <h2>Fresh for you</h2>
-              <Link to='/'>Home feed</Link>
+              <h2>{t('Fresh for you')}</h2>
+              <Link to='/'>{t('Home feed')}</Link>
             </div>
             <div className='explore-feed-grid'>
               {morePosts.map((post) => (
                 <article className='explore-mini-card' key={post.id}>
                   <Link to={`/profile/${post.author?.id ?? ''}`} className='mini-author'>
                     {post.author?.avatar ? (
-                      <img src={getMediaUrl(post.author.avatar)} alt='' />
+                      <img src={getMediaUrl(post.author.avatar)} alt='' loading='lazy' />
                     ) : (
                       <span>{post.author?.name?.[0] ?? '?'}</span>
                     )}
@@ -135,13 +137,13 @@ export default function Explore() {
                   {post.mediaUrl && (
                     <div className='mini-media'>
                       {post.mediaType === 'video' ? (
-                        <video src={getMediaUrl(post.mediaUrl)} muted playsInline />
+                        <video src={getMediaUrl(post.mediaUrl)} muted playsInline preload={lowData ? 'none' : 'metadata'} />
                       ) : (
-                        <img src={getMediaUrl(post.mediaUrl)} alt={post.text || 'Post'} />
+                        <img src={getMediaUrl(post.mediaUrl)} alt={post.text || 'Post'} loading='lazy' />
                       )}
                     </div>
                   )}
-                  <p>{post.text || 'A community highlight'}</p>
+                  <p>{post.text || t('A community highlight')}</p>
                 </article>
               ))}
             </div>

@@ -3,9 +3,11 @@ import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-do
 import { useAuth } from '../../auth/useAuth'
 import AuthLayout from '../../components/auth/AuthLayout'
 import PasswordInput from '../../components/auth/PasswordInput'
+import { usePreferences } from '../../preferences/usePreferences'
 
 export default function Login() {
   const { signIn, signInWithGoogle } = useAuth()
+  const { t } = usePreferences()
   const location = useLocation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -62,10 +64,10 @@ export default function Login() {
 
   return (
     <AuthLayout
-      eyebrow='WELCOME BACK'
-      title='Good to see you again.'
-      description='Sign in to catch up with the people and moments that make your day.'
-      footer={<>New to Qavero? <Link to='/signup'>Create an account</Link></>}
+      eyebrow={t('WELCOME BACK')}
+      title={t('Good to see you again.')}
+      description={t('Sign in to catch up with the people and moments that make your day.')}
+      footer={<>{t('New to Qavero?')} <Link to='/signup'>{t('Create an account')}</Link></>}
     >
       <form className='auth-form' onSubmit={handleSubmit}>
         {statusMessage && (
@@ -74,7 +76,7 @@ export default function Login() {
           </p>
         )}
         <div className='auth-field'>
-          <label htmlFor='login-email'>Email address</label>
+          <label htmlFor='login-email'>{t('Email address')}</label>
           <input
             className='auth-input'
             id='login-email'
@@ -90,19 +92,19 @@ export default function Login() {
         <PasswordInput
           id='login-password'
           name='password'
-          label='Password'
+          label={t('Password')}
           autoComplete='current-password'
         />
         <div className='auth-form-options'>
-          <Link to='/reset-password' state={{ email }}>Forgot password?</Link>
+          <Link to='/reset-password' state={{ email }}>{t('Forgot password?')}</Link>
         </div>
         {error && (
           <p className='auth-message auth-message--error' role='alert'>
-            {error}{needsVerification && <> <Link to='/verify-email' state={{ email }}>Verify your email.</Link></>}
+            {error}{needsVerification && <> <Link to='/verify-email' state={{ email }}>{t('Verify your email.')}</Link></>}
           </p>
         )}
         <button type='submit' className='auth-submit' disabled={submitting}>
-          {submitting ? 'Signing in...' : 'Sign in'}
+          {submitting ? t('Signing in...') : t('Sign in')}
           {!submitting && <span aria-hidden='true'>→</span>}
         </button>
         <button
@@ -111,7 +113,7 @@ export default function Login() {
           disabled={submitting}
           onClick={handleGoogleSignIn}
         >
-          Continue with Google
+          {t('Continue with Google')}
         </button>
       </form>
     </AuthLayout>

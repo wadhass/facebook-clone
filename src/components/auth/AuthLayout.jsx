@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import './auth.css'
+import PreferenceControls from '../../preferences/PreferenceControls'
 
 export default function AuthLayout({ eyebrow, title, description, footer, children }) {
   return (
@@ -48,6 +49,7 @@ export default function AuthLayout({ eyebrow, title, description, footer, childr
           <span>qavero</span>
         </Link>
         <div className='auth-content'>
+          <PreferenceControls className='auth-preference-controls' />
           <header className='auth-heading'>
             <span className='auth-eyebrow'>{eyebrow}</span>
             <h2>{title}</h2>

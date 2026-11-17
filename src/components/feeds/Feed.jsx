@@ -5,6 +5,7 @@ import { useState } from 'react'
 import Comments from '../comments/Comments'
 import { useAuth } from '../../auth/useAuth'
 import { apiRequest, getMediaUrl } from '../../api'
+import { usePreferences } from '../../preferences/usePreferences'
 
 // Font Awesome Icon..........
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -12,6 +13,7 @@ import { faComment, faHeart, faTrash } from '@fortawesome/free-solid-svg-icons'
 
 export default function Feed ({fed}) {
     const { user } = useAuth()
+    const { lowData, t } = usePreferences()
     const [post, setPost] = useState(fed)
     const [openComment, setOpenComment] = useState(false)
     const [error, setError] = useState('')
@@ -85,24 +87,24 @@ export default function Feed ({fed}) {
         <div className="mid-content">
             <p>{post.text}</p>
             {post.mediaUrl && post.mediaType === 'video' && (
-              <video src={getMediaUrl(post.mediaUrl)} controls className='post-attachment' />
+              <video src={getMediaUrl(post.mediaUrl)} controls preload={lowData ? 'none' : 'metadata'} className='post-attachment' />
             )}
             {post.mediaUrl && post.mediaType === 'image' && (
-              <img src={getMediaUrl(post.mediaUrl)} alt='Post attachment' className='post-attachment' />
+              <img src={getMediaUrl(post.mediaUrl)} alt='Post attachment' loading='lazy' className='post-attachment' />
             )}
-            {post.imageUrl && <img src={post.imageUrl} alt="Post attachment" />}
+            {post.imageUrl && <img src={post.imageUrl} alt="Post attachment" loading='lazy' />}
         </div>
         <div className="bottom-content">
             <div className="action-item" onClick={toggleLike} role='button' tabIndex={0} onKeyDown={(event) => {
               if (event.key === 'Enter' || event.key === ' ') toggleLike()
             }}>
-                <span><FontAwesomeIcon icon={faHeart} /> {post.likes.length} Like{post.likes.length === 1 ? '' : 's'}</span>
+                <span><FontAwesomeIcon icon={faHeart} /> {post.likes.length} {t(post.likes.length === 1 ? 'Like' : 'Likes')}</span>
             </div>
             <button type='button' className="action-item" onClick={() => setOpenComment(!openComment)}>
-                <span><FontAwesomeIcon icon={faComment} /> {post.comments.length} Comment{post.comments.length === 1 ? '' : 's'}</span>
+                <span><FontAwesomeIcon icon={faComment} /> {post.comments.length} {t(post.comments.length === 1 ? 'Comment' : 'Comments')}</span>
             </button>
         </div>
-        {liked && <span className='sr-only'>You liked this post</span>}
+        {liked && <span className='sr-only'>{t('You liked this post')}</span>}
         {error && <p role='alert'>{error}</p>}
         {openComment && <Comments comments={post.comments} onComment={addComment} />}
     </div>

@@ -1,7 +1,10 @@
 import './userStory.css'
 import { getMediaUrl } from '../../api'
+import { usePreferences } from '../../preferences/usePreferences'
 
 export default function UserStory ({ user, onCreate, uploading }) {
+  const { t } = usePreferences()
+
   return (
     <label className='story userStory'>
       {user?.avatar
@@ -11,15 +14,16 @@ export default function UserStory ({ user, onCreate, uploading }) {
       <input
         type='file'
         accept='image/*,video/*'
-        aria-label='Add a story photo or video'
+        multiple
+        aria-label={t('Add a story photo or video')}
         disabled={uploading}
         onChange={(event) => {
-          const file = event.target.files?.[0]
+          const files = Array.from(event.target.files ?? [])
           event.target.value = ''
-          if (file) onCreate(file)
+          if (files.length) onCreate(files)
         }}
       />
-      <h5>{uploading ? 'Uploading…' : 'Add story'}</h5>
+      <h5>{uploading ? t('Uploading…') : t('Add story')}</h5>
     </label>
   )
 }

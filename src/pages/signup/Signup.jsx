@@ -3,9 +3,11 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import AuthLayout from '../../components/auth/AuthLayout'
 import PasswordInput from '../../components/auth/PasswordInput'
+import { usePreferences } from '../../preferences/usePreferences'
 
 export default function Signup(){
   const { signUp, signInWithGoogle } = useAuth()
+  const { t } = usePreferences()
   const navigate = useNavigate()
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -50,14 +52,14 @@ export default function Signup(){
 
   return (
     <AuthLayout
-      eyebrow='YOUR PEOPLE, YOUR PLACE'
-      title='Make room for more connection.'
-      description='Join Qavero to share your moments, find your people, and keep every conversation close.'
-      footer={<>Already have an account? <Link to='/login'>Sign in</Link></>}
+      eyebrow={t('YOUR PEOPLE, YOUR PLACE')}
+      title={t('Make room for more connection.')}
+      description={t('Join Qavero to share your moments, find your people, and keep every conversation close.')}
+      footer={<>{t('Already have an account?')} <Link to='/login'>{t('Sign in')}</Link></>}
     >
       <form className='auth-form' onSubmit={handleSubmit}>
         <div className='auth-field'>
-          <label htmlFor='signup-name'>Full name</label>
+          <label htmlFor='signup-name'>{t('Full name')}</label>
           <input
             className='auth-input'
             id='signup-name'
@@ -66,12 +68,12 @@ export default function Signup(){
             required
             minLength={2}
             maxLength={80}
-            placeholder='How should we call you?'
+            placeholder={t('How should we call you?')}
             autoComplete='name'
           />
         </div>
         <div className='auth-field'>
-          <label htmlFor='signup-email'>Email address</label>
+          <label htmlFor='signup-email'>{t('Email address')}</label>
           <input
             className='auth-input'
             id='signup-email'
@@ -85,15 +87,15 @@ export default function Signup(){
         <PasswordInput
           id='signup-password'
           name='password'
-          label='Create a password'
+          label={t('Create a password')}
           autoComplete='new-password'
           minLength={8}
           maxLength={128}
-          hint='Use at least 8 characters.'
+          hint={t('Use at least 8 characters.')}
         />
         {error && <p className='auth-message auth-message--error' role='alert'>{error}</p>}
         <button type='submit' className='auth-submit' disabled={submitting}>
-          {submitting ? 'Creating your account...' : 'Create account'}
+          {submitting ? t('Creating your account...') : t('Create account')}
           {!submitting && <span aria-hidden='true'>→</span>}
         </button>
         <button
@@ -102,9 +104,9 @@ export default function Signup(){
           disabled={submitting}
           onClick={handleGoogleSignIn}
         >
-          Continue with Google
+          {t('Continue with Google')}
         </button>
-        <p className='auth-terms'>By continuing, you agree to keep Qavero kind and welcoming.</p>
+        <p className='auth-terms'>{t('By continuing, you agree to keep Qavero kind and welcoming.')}</p>
       </form>
     </AuthLayout>
   )

@@ -5,19 +5,25 @@ import { faPhone, faVideo } from '@fortawesome/free-solid-svg-icons'
 import { apiRequest, getMediaUrl } from '../../api'
 import { useCalls } from '../../calls/useCalls'
 import { useAuth } from '../../auth/useAuth'
+import { usePreferences } from '../../preferences/usePreferences'
 import './calls.css'
 
-function callStatus(call, currentUserId) {
-  if (call.status === 'missed') return 'Missed call'
-  if (call.status === 'rejected') return 'Declined'
-  if (call.status === 'ringing') return 'No answer'
+function callStatus(call, currentUserId, t) {
+  if (call.status === 'missed') return t('Missed call')
+  if (call.status === 'rejected') return t('Declined')
+  if (call.status === 'ringing') return t('No answer')
   const isOutgoing = call.caller?.id === currentUserId
-  return call.status === 'active' ? 'In progress' : isOutgoing ? 'Outgoing call' : 'Incoming call'
+  return call.status === 'active'
+    ? t('In progress')
+    : isOutgoing
+      ? t('Outgoing call')
+      : t('Incoming call')
 }
 
 export default function Calls() {
   const { startCall, call: activeCall } = useCalls()
   const { user } = useAuth()
+  const { t } = usePreferences()
   const [calls, setCalls] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
@@ -50,13 +56,13 @@ export default function Calls() {
   return (
     <section className='call-history-page'>
       <header>
-        <span className='call-history-eyebrow'>STAY IN TOUCH</span>
-        <h1>Calls</h1>
-        <p>Your recent audio and video calls.</p>
+        <span className='call-history-eyebrow'>{t('STAY IN TOUCH')}</span>
+        <h1>{t('Calls')}</h1>
+        <p>{t('Your recent audio and video calls.')}</p>
       </header>
       {error && <p role='alert'>{error}</p>}
-      {loading && <p role='status'>Loading call history...</p>}
-      {!loading && !calls.length && <p>No calls yet. Start one from a friend’s conversation.</p>}
+      {loading && <p role='status'>{t('Loading call history...')}</p>}
+      {!loading && !calls.length && <p>{t('No calls yet. Start one from a friend’s conversation.')}</p>}
       <div className='call-history-list'>
         {calls.map((call) => {
           const currentUserIsCaller = call.caller?.id === user.id
@@ -71,7 +77,7 @@ export default function Calls() {
                 <span>
                   <strong>{peer.name}</strong>
                   <small>
-                    {callStatus(call, user.id)} · {call.kind} · {new Date(call.createdAt).toLocaleString()}
+                    {callStatus(call, user.id, t)} · {t(call.kind)} · {new Date(call.createdAt).toLocaleString()}
                     {call.durationSeconds > 0 ? ` · ${Math.floor(call.durationSeconds / 60)}:${String(call.durationSeconds % 60).padStart(2, '0')}` : ''}
                   </small>
                 </span>
@@ -79,8 +85,8 @@ export default function Calls() {
               <div className='call-history-actions'>
                 <button
                   type='button'
-                  aria-label={`Audio call ${peer.name}`}
-                  title='Audio call'
+                  aria-label={`${t('Audio call')} ${peer.name}`}
+                  title={t('Audio call')}
                   disabled={Boolean(activeCall)}
                   onClick={() => callBack(peer, 'audio')}
                 >
@@ -88,8 +94,8 @@ export default function Calls() {
                 </button>
                 <button
                   type='button'
-                  aria-label={`Video call ${peer.name}`}
-                  title='Video call'
+                  aria-label={`${t('Video call')} ${peer.name}`}
+                  title={t('Video call')}
                   disabled={Boolean(activeCall)}
                   onClick={() => callBack(peer, 'video')}
                 >

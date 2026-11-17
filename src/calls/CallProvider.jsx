@@ -1,7 +1,36 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { apiRequest } from '../api'
 import { useRealtime } from '../realtime/useRealtime'
+import { usePreferences } from '../preferences/usePreferences'
 import CallContext from './context'
+
+function getCallMediaConstraints(kind, lowData) {
+  return {
+    audio: true,
+    video: kind === 'video'
+      ? {
+          facingMode: 'user',
+          ...(lowData ? {
+            width: { ideal: 640 },
+            height: { ideal: 360 },
+            frameRate: { ideal: 20, max: 20 },
+          } : {}),
+        }
+      : false,
+  }
+}
+
+async function setVideoSenderBitrate(sender, lowData) {
+  const parameters = sender.getParameters()
+  if (!parameters.encodings?.length) return
+  const encodings = parameters.encodings
+  parameters.encodings = encodings.map((encoding) => {
+    const otherParameters = { ...encoding }
+    delete otherParameters.maxBitrate
+    return lowData ? { ...otherParameters, maxBitrate: 450_000 } : otherParameters
+  })
+  await sender.setParameters(parameters)
+}
 
 function stopTracks(stream) {
   stream?.getTracks().forEach((track) => track.stop())
@@ -13,6 +42,7 @@ function isCallFinished(status) {
 
 export function CallProvider({ children }) {
   const { socket } = useRealtime()
+  const { lowData } = usePreferences()
   const [call, setCall] = useState(null)
   const [error, setError] = useState('')
   const callRef = useRef(null)
@@ -99,7 +129,14 @@ export function CallProvider({ children }) {
     if (peerConnectionRef.current) return
     const peer = new RTCPeerConnection({ iceServers: iceServersRef.current })
     peerConnectionRef.current = peer
-    localStreamRef.current?.getTracks().forEach((track) => peer.addTrack(track, localStreamRef.current))
+    for (const track of localStreamRef.current?.getTracks() ?? []) {
+      const sender = peer.addTrack(track, localStreamRef.current)
+      if (track.kind === 'video' && lowData) {
+        setVideoSenderBitrate(sender, lowData).catch((requestError) => {
+          setError(requestError.message || 'Could not reduce call video bitrate')
+        })
+      }
+    }
     peer.onicecandidate = (event) => {
       if (event.candidate) sendSignal({ type: 'ice', candidate: event.candidate.toJSON() })
     }
@@ -133,7 +170,16 @@ export function CallProvider({ children }) {
     }
     const queued = pendingSignalsRef.current.splice(0)
     for (const signal of queued) await receiveSignal(signal)
-  }, [receiveSignal, sendSignal, updateCall])
+  }, [lowData, receiveSignal, sendSignal, updateCall])
+
+  useEffect(() => {
+    const videoSenders = peerConnectionRef.current?.getSenders()
+      .filter((sender) => sender.track?.kind === 'video') ?? []
+    Promise.all(videoSenders.map((sender) => setVideoSenderBitrate(sender, lowData)))
+      .catch((requestError) => {
+        setError(requestError.message || 'Could not adjust call video quality')
+      })
+  }, [lowData])
 
   useEffect(() => {
     if (!socket) return undefined
@@ -240,10 +286,7 @@ export function CallProvider({ children }) {
     try {
       const { iceServers } = await apiRequest('/calls/ice-servers')
       if (attempt !== callAttemptRef.current) return
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: kind === 'video' ? { facingMode: 'user' } : false,
-      })
+      const stream = await navigator.mediaDevices.getUserMedia(getCallMediaConstraints(kind, lowData))
       if (attempt !== callAttemptRef.current) {
         stopTracks(stream)
         return
@@ -287,7 +330,7 @@ export function CallProvider({ children }) {
       closeCall()
       throw requestError
     }
-  }, [closeCall, releaseMedia, socket, updateCall])
+  }, [closeCall, lowData, releaseMedia, socket, updateCall])
 
   const acceptCall = useCallback(async () => {
     const activeCall = callRef.current
@@ -297,10 +340,7 @@ export function CallProvider({ children }) {
     try {
       const { iceServers } = await apiRequest('/calls/ice-servers')
       if (attempt !== callAttemptRef.current) return
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: activeCall.kind === 'video' ? { facingMode: 'user' } : false,
-      })
+      const stream = await navigator.mediaDevices.getUserMedia(getCallMediaConstraints(activeCall.kind, lowData))
       if (attempt !== callAttemptRef.current) {
         stopTracks(stream)
         return
@@ -325,7 +365,7 @@ export function CallProvider({ children }) {
       socket.emit('call:reject', { callId: activeCall.callId }, () => {})
       closeCall()
     }
-  }, [closeCall, socket, updateCall])
+  }, [closeCall, lowData, socket, updateCall])
 
   const rejectCall = useCallback(() => {
     const activeCall = callRef.current

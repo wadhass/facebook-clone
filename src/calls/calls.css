@@ -26,6 +26,48 @@
   box-shadow: 0 35px 90px rgba(0, 0, 0, 0.45);
 }
 
+.call-overlay-backdrop.is-compact {
+  place-items: end;
+  padding: 16px;
+  background: transparent;
+  backdrop-filter: none;
+  pointer-events: none;
+}
+
+.call-overlay.is-compact {
+  width: min(340px, calc(100vw - 32px));
+  min-height: 0;
+  justify-content: flex-start;
+  padding: 58px 16px 16px;
+  border-radius: 20px;
+  pointer-events: auto;
+}
+
+.call-overlay.is-compact .call-avatar {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 8px;
+  font-size: 1.5rem;
+}
+
+.call-overlay.is-compact .call-details h2 {
+  font-size: 1.1rem;
+}
+
+.call-overlay.is-compact .call-details p {
+  font-size: .82rem;
+}
+
+.call-overlay.is-compact .call-actions {
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.call-overlay.is-compact .call-action {
+  width: 48px;
+  height: 48px;
+}
+
 .call-overlay.is-video {
   width: min(390px, 100%);
   min-height: min(760px, calc(100dvh - 24px));
@@ -274,6 +316,12 @@
     width: min(100%, 390px);
     min-height: min(640px, calc(100dvh - 12px));
     border-radius: 26px;
+  }
+
+  .call-overlay.is-compact {
+    width: min(340px, calc(100vw - 32px));
+    min-height: 0;
+    border-radius: 20px;
   }
 
   .call-avatar {

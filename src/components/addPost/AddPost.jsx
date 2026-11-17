@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { apiRequest, getMediaUrl } from '../../api'
+import { usePreferences } from '../../preferences/usePreferences'
 
 const MAX_MEDIA_SIZE = 50 * 1024 * 1024
 
 export default function AddPost () {
   const { user } = useAuth()
+  const { lowData, t } = usePreferences()
   const [searchParams, setSearchParams] = useSearchParams()
   const [text, setText] = useState('')
   const [media, setMedia] = useState(null)
@@ -110,30 +112,30 @@ export default function AddPost () {
           type="text"
           value={text}
           onChange={(event) => setText(event.target.value)}
-          placeholder={isReel ? 'Add a caption to your reel…' : 'What is on your mind?'}
+          placeholder={isReel ? t('Add a caption to your reel…') : t('What is on your mind?')}
           maxLength={5000}
         />
         <button type='submit' className='btn btn-primary' disabled={submitting || (!text.trim() && !media)}>
-          {submitting ? 'Posting...' : 'Post'}
+          {submitting ? t('Posting...') : t('Post')}
         </button>
     </div>
     {media && (
       <div className='post-media-preview'>
         {media.file.type.startsWith('video/')
-          ? <video src={media.previewUrl} controls />
+          ? <video src={media.previewUrl} controls preload={lowData ? 'none' : 'metadata'} />
           : <img src={media.previewUrl} alt='Selected post attachment' />}
         <button type='button' className='btn btn-red' onClick={() => setMedia(null)}>
-          Remove attachment
+          {t('Remove attachment')}
         </button>
       </div>
     )}
     <label className='post-media-picker'>
-      <span>{isReel ? 'Choose a reel video' : 'Choose a photo or video from your device'}</span>
+      <span>{isReel ? t('Choose a reel video') : t('Choose a photo or video from your device')}</span>
       <input type='file' accept={isReel ? 'video/*' : 'image/*,video/*'} onChange={handleMediaChange} />
     </label>
     <label className='post-reel-option'>
       <input type='checkbox' checked={isReel} onChange={handleReelChange} />
-      <span>Share this video as a Reel</span>
+      <span>{t('Share this video as a Reel')}</span>
     </label>
     {error && <p role='alert'>{error}</p>}
    </form>

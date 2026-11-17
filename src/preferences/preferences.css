@@ -1,0 +1,45 @@
+.preference-controls {
+  display: grid;
+  gap: .9rem;
+  color: var(--text-color);
+  font-size: .86rem;
+}
+
+.preference-language {
+  display: grid;
+  gap: .35rem;
+}
+
+.preference-language select {
+  width: 100%;
+  padding: .55rem;
+  border: 1px solid var(--color-border);
+  border-radius: .45rem;
+  background: var(--color-bg);
+  color: var(--text-color);
+  font: inherit;
+}
+
+.preference-low-data {
+  display: flex;
+  align-items: flex-start;
+  gap: .55rem;
+}
+
+.preference-low-data input {
+  margin-top: .2rem;
+}
+
+.preference-low-data span {
+  display: grid;
+  gap: .2rem;
+}
+
+.preference-low-data small {
+  color: var(--color-soft);
+  line-height: 1.4;
+}
+
+.auth-preference-controls {
+  margin: 0 0 1.25rem auto;
+}

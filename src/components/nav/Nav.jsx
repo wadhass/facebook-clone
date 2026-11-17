@@ -4,6 +4,8 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { getMediaUrl } from '../../api'
 import NotificationsMenu from '../notifications/NotificationsMenu'
+import { usePreferences } from '../../preferences/usePreferences'
+import PreferenceControls from '../../preferences/PreferenceControls'
 
 // Components.........
 import DarkMoode from '../darkmod/DarkMoode';
@@ -14,6 +16,7 @@ import { faCompass, faEnvelope, faHome, faSearch, faUser } from '@fortawesome/fr
 
 export default function Nav  () {
   const { user, signOut } = useAuth()
+  const { t } = usePreferences()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [search, setSearch] = useState(searchParams.get('search') ?? '')
@@ -42,13 +45,13 @@ export default function Nav  () {
             <img src="/qavero.svg" alt="" className="brand-icon" />
             <h3 className='logo'>QAVERO</h3>
           </Link>
-          <Link to='/' aria-label='Home'>
+          <Link to='/' aria-label={t('Home')}>
           <FontAwesomeIcon icon={faHome}/>
           </Link>
-          <Link to='/explore' aria-label='Explore'>
+          <Link to='/explore' aria-label={t('Explore')}>
           <FontAwesomeIcon icon={faCompass}/>
           </Link>
-          <Link to={`/profile/${user?.id ?? ''}`} aria-label='Profile'>
+          <Link to={`/profile/${user?.id ?? ''}`} aria-label={t('Profile')}>
           <FontAwesomeIcon icon={faUser}/>
           </Link>
           <form className="nav-Serchbar" role='search' onSubmit={handleSearch}>
@@ -57,23 +60,27 @@ export default function Nav  () {
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder='Search people'
-            aria-label='Search people'
+            placeholder={t('Search people')}
+            aria-label={t('Search people')}
           />
           </form>
         </div>
         {/* ..................NavAria Right................ */}
         <div className='nav-right'>
-          <Link to='/friends' aria-label='Messages' title='Messages'>
+          <Link to='/friends' aria-label={t('Messages')} title={t('Messages')}>
             <FontAwesomeIcon icon={faEnvelope}/>
           </Link>
           <NotificationsMenu />
           <DarkMoode />
+          <details className='nav-preferences'>
+            <summary aria-label={t('Settings')} title={t('Settings')}>⚙</summary>
+            <PreferenceControls />
+          </details>
           <div className="user">
             {user?.avatar && <img src={getMediaUrl(user.avatar)} alt="" />}
             <h4>{user?.name}</h4>
           </div>
-          <button className='btn' type='button' onClick={handleSignOut}>Log out</button>
+          <button className='btn' type='button' onClick={handleSignOut}>{t('Log out')}</button>
         </div>
       </div>
     </nav>
