@@ -7,6 +7,7 @@ import { useAuth } from '../../auth/useAuth'
 import { useRealtime } from '../../realtime/useRealtime'
 import { useCalls } from '../../calls/useCalls'
 import { usePreferences } from '../../preferences/usePreferences'
+import MessageImage from '../../components/message/MessageImage'
 
 // Font Awesome icon.........
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -480,7 +481,11 @@ export default function ChatBox () {
             <strong>{message.sender.id === user.id ? 'You' : message.sender.name}:</strong>
             {message.text && <> {message.text}</>}
             {message.mediaUrl && message.type === 'image' && (
-              <img className='chat-attachment-image' src={getMediaUrl(message.mediaUrl)} alt={message.fileName || 'Image attachment'} />
+              <MessageImage
+                className='chat-attachment-image'
+                mediaUrl={getMediaUrl(message.mediaUrl)}
+                alt={message.fileName || 'Image attachment'}
+              />
             )}
             {message.mediaUrl && message.type === 'video' && (
               <video className='chat-attachment-video' src={getMediaUrl(message.mediaUrl)} controls preload={lowData ? 'none' : 'metadata'} />

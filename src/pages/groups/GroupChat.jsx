@@ -4,6 +4,7 @@ import { apiRequest, getMediaUrl } from '../../api'
 import { useAuth } from '../../auth/useAuth'
 import { useRealtime } from '../../realtime/useRealtime'
 import { usePreferences } from '../../preferences/usePreferences'
+import MessageImage from '../../components/message/MessageImage'
 import './groups.css'
 
 function mergeMessages(current, incoming) {
@@ -176,7 +177,11 @@ export default function GroupChat() {
             <small>{message.sender.name}</small>
             {message.text && <p>{message.text}</p>}
             {message.mediaUrl && message.type === 'image' && (
-              <img src={getMediaUrl(message.mediaUrl)} alt={message.fileName || 'Group image'} />
+              <MessageImage
+                className='group-chat-image'
+                mediaUrl={getMediaUrl(message.mediaUrl)}
+                alt={message.fileName || 'Group image'}
+              />
             )}
             {message.mediaUrl && message.type === 'video' && (
               <video src={getMediaUrl(message.mediaUrl)} controls preload={lowData ? 'none' : 'metadata'} />

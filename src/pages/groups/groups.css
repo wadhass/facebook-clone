@@ -234,6 +234,10 @@
   object-fit: contain;
 }
 
+.group-chat-message > .group-chat-image-state {
+  font-size: .75rem;
+}
+
 .group-chat-message > a {
   color: var(--color-primary);
 }
