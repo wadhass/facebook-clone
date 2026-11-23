@@ -12,7 +12,7 @@ import DarkMoode from '../darkmod/DarkMoode';
 
 // fontAwesome Icon
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCompass, faEnvelope, faHome, faSearch, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faCompass, faHome, faSearch, faUser } from '@fortawesome/free-solid-svg-icons';
 
 export default function Nav  () {
   const { user, signOut } = useAuth()
@@ -67,9 +67,6 @@ export default function Nav  () {
         </div>
         {/* ..................NavAria Right................ */}
         <div className='nav-right'>
-          <Link to='/friends' aria-label={t('Messages')} title={t('Messages')}>
-            <FontAwesomeIcon icon={faEnvelope}/>
-          </Link>
           <NotificationsMenu />
           <DarkMoode />
           <details className='nav-preferences'>

@@ -138,9 +138,13 @@ export default function CallOverlay() {
               ? 'Call ended'
               : call.connectionState === 'failed'
                 ? 'Connection failed'
-                : call.remoteStream
-                  ? formatDuration(duration)
-                  : 'Connecting…'
+                : call.connectionState === 'disconnected'
+                ? 'Reconnecting…'
+                : call.connectionState !== 'connected'
+                  ? 'Connecting…'
+                  : call.remoteStream
+                    ? formatDuration(duration)
+                    : 'Connecting…'
 
   return (
     <div className={`call-overlay-backdrop${compact ? ' is-compact' : ''}`}>

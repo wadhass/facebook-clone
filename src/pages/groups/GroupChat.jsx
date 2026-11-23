@@ -4,7 +4,7 @@ import { apiRequest, getMediaUrl } from '../../api'
 import { useAuth } from '../../auth/useAuth'
 import { useRealtime } from '../../realtime/useRealtime'
 import { usePreferences } from '../../preferences/usePreferences'
-import MessageImage from '../../components/message/MessageImage'
+import MessageAttachment from '../../components/message/MessageAttachment'
 import './groups.css'
 
 function mergeMessages(current, incoming) {
@@ -176,23 +176,15 @@ export default function GroupChat() {
           >
             <small>{message.sender.name}</small>
             {message.text && <p>{message.text}</p>}
-            {message.mediaUrl && message.type === 'image' && (
-              <MessageImage
-                className='group-chat-image'
+            {message.mediaUrl && (
+              <MessageAttachment
+                type={message.type}
                 mediaUrl={getMediaUrl(message.mediaUrl)}
+                fileName={message.fileName}
                 alt={message.fileName || 'Group image'}
+                className='group-chat'
+                lowData={lowData}
               />
-            )}
-            {message.mediaUrl && message.type === 'video' && (
-              <video src={getMediaUrl(message.mediaUrl)} controls preload={lowData ? 'none' : 'metadata'} />
-            )}
-            {message.mediaUrl && message.type === 'audio' && (
-              <audio src={getMediaUrl(message.mediaUrl)} controls preload='metadata' />
-            )}
-            {message.mediaUrl && message.type === 'file' && (
-              <a href={getMediaUrl(message.mediaUrl)} download={message.fileName}>
-                {message.fileName || 'Download attachment'}
-              </a>
             )}
             <time>{new Date(message.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</time>
           </article>

@@ -152,11 +152,9 @@ export function CallProvider({ children }) {
       updateCall((current) => current ? { ...current, remoteStream: remoteStreamRef.current } : current)
     }
     peer.onconnectionstatechange = () => {
-      if (['failed', 'disconnected'].includes(peer.connectionState)) {
-        updateCall((current) => current
-          ? { ...current, connectionState: peer.connectionState }
-          : current)
-      }
+      updateCall((current) => current
+        ? { ...current, connectionState: peer.connectionState }
+        : current)
     }
 
     updateCall((current) => current
@@ -189,6 +187,7 @@ export function CallProvider({ children }) {
         socket.emit('call:reject', { callId }, () => {})
         return
       }
+      callAttemptRef.current += 1
       window.clearTimeout(finishTimerRef.current)
       setError('')
       updateCall({
@@ -228,6 +227,8 @@ export function CallProvider({ children }) {
     acceptedHandlerRef.current = handleAccepted
     const handleFinished = (finishedCall) => {
       if (callRef.current?.callId !== finishedCall.callId) return
+      callAttemptRef.current += 1
+      pendingAcceptedRef.current = null
       const current = callRef.current
       releaseMedia()
       updateCall({

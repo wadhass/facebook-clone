@@ -119,26 +119,13 @@
     border-radius: .6rem;
     object-fit: contain;
 }
-.chat-audio-attachment{
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    margin-top: .5rem;
-}
-.chat-audio-attachment audio{
-    width: min(260px, 55vw);
-    height: 38px;
-}
-.chat-audio-attachment select{
-    padding: .3rem;
-    border-radius: .4rem;
-    color: var(--text-color);
-    background: var(--color-card);
-}
 .chat-file-attachment{
     display: block;
     margin-top: .5rem;
     color: var(--color-primary);
+}
+.chat-message--own .message-attachment-download{
+    color: white;
 }
 .chat-message-meta{
     margin: 4px 3px 0;

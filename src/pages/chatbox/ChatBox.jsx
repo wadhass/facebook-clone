@@ -2,12 +2,12 @@ import './chatbox.css'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { apiRequest, getAuthToken, getMediaUrl } from '../../api'
+import { apiRequest, getMediaUrl } from '../../api'
 import { useAuth } from '../../auth/useAuth'
 import { useRealtime } from '../../realtime/useRealtime'
 import { useCalls } from '../../calls/useCalls'
 import { usePreferences } from '../../preferences/usePreferences'
-import MessageImage from '../../components/message/MessageImage'
+import MessageAttachment from '../../components/message/MessageAttachment'
 
 // Font Awesome icon.........
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -23,60 +23,6 @@ import {
 
 const emojiOptions = ['😀', '😂', '🥰', '😍', '😮', '😢', '😡', '👍', '❤️', '🎉', '👋', '🙏']
 const stickerOptions = ['❤️', '😂', '🥰', '👍', '🎉', '👋', '🙌', '😍']
-
-function VoiceAttachment({ mediaUrl }) {
-  const [audioUrl, setAudioUrl] = useState('')
-  const [failed, setFailed] = useState(false)
-
-  useEffect(() => {
-    let cancelled = false
-    let objectUrl = ''
-
-    async function loadAudio() {
-      try {
-        const token = await getAuthToken()
-        const headers = new Headers()
-        if (token) headers.set('Authorization', `Bearer ${token}`)
-        const response = await fetch(mediaUrl, { headers })
-        if (!response.ok) throw new Error('Voice message could not be loaded')
-        objectUrl = URL.createObjectURL(await response.blob())
-        if (cancelled) URL.revokeObjectURL(objectUrl)
-        else setAudioUrl(objectUrl)
-      } catch {
-        if (!cancelled) setFailed(true)
-      }
-    }
-
-    loadAudio()
-    return () => {
-      cancelled = true
-      if (objectUrl) URL.revokeObjectURL(objectUrl)
-    }
-  }, [mediaUrl])
-
-  if (failed) return <span role='status'>Voice message unavailable</span>
-  if (!audioUrl) return <span role='status'>Loading voice message...</span>
-
-  return (
-    <span className='chat-audio-attachment'>
-      <audio src={audioUrl} controls preload='metadata' />
-      <select
-        aria-label='Voice message playback speed'
-        defaultValue='1'
-        onChange={(event) => {
-          const audio = event.currentTarget.previousElementSibling
-          if (audio) audio.playbackRate = Number(event.target.value)
-        }}
-      >
-        <option value='0.75'>0.75×</option>
-        <option value='1'>1×</option>
-        <option value='1.25'>1.25×</option>
-        <option value='1.5'>1.5×</option>
-        <option value='2'>2×</option>
-      </select>
-    </span>
-  )
-}
 
 export default function ChatBox () {
   const { id: friendId } = useParams()
@@ -480,23 +426,15 @@ export default function ChatBox () {
           <p>
             <strong>{message.sender.id === user.id ? 'You' : message.sender.name}:</strong>
             {message.text && <> {message.text}</>}
-            {message.mediaUrl && message.type === 'image' && (
-              <MessageImage
-                className='chat-attachment-image'
+            {message.mediaUrl && (
+              <MessageAttachment
+                type={message.type}
                 mediaUrl={getMediaUrl(message.mediaUrl)}
+                fileName={message.fileName}
                 alt={message.fileName || 'Image attachment'}
+                className='chat-attachment'
+                lowData={lowData}
               />
-            )}
-            {message.mediaUrl && message.type === 'video' && (
-              <video className='chat-attachment-video' src={getMediaUrl(message.mediaUrl)} controls preload={lowData ? 'none' : 'metadata'} />
-            )}
-            {message.mediaUrl && message.type === 'audio' && (
-              <VoiceAttachment mediaUrl={getMediaUrl(message.mediaUrl)} />
-            )}
-            {message.mediaUrl && message.type === 'file' && (
-              <a className='chat-file-attachment' href={getMediaUrl(message.mediaUrl)} download={message.fileName}>
-                {message.fileName || 'Download attachment'}
-              </a>
             )}
           </p>
           <small className='chat-message-meta'>

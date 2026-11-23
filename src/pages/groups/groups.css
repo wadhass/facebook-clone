@@ -226,20 +226,24 @@
   color: inherit;
 }
 
-.group-chat-message > img,
-.group-chat-message > video {
+.group-chat-message > .group-chat-image,
+.group-chat-message > .group-chat-video {
   width: min(100%, 360px);
   max-height: 280px;
   border-radius: 9px;
   object-fit: contain;
 }
 
-.group-chat-message > .group-chat-image-state {
+.group-chat-message > .group-chat-state {
   font-size: .75rem;
 }
 
 .group-chat-message > a {
   color: var(--color-primary);
+}
+
+.group-chat-message.is-own > a {
+  color: white;
 }
 
 .group-typing {

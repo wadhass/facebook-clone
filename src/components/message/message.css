@@ -52,3 +52,26 @@
 .message p{
     font-size: .9rem;
 }
+.message-attachment-download{
+    display: block;
+    width: fit-content;
+    margin-top: .35rem;
+    color: var(--color-primary);
+    font-size: .8rem;
+}
+.message-audio-attachment{
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-top: .5rem;
+}
+.message-audio-attachment audio{
+    width: min(260px, 55vw);
+    height: 38px;
+}
+.message-audio-attachment select{
+    padding: .3rem;
+    border-radius: .4rem;
+    color: var(--text-color);
+    background: var(--color-card);
+}

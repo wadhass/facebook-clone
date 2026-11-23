@@ -8,6 +8,7 @@ import './notifications.css'
 
 function notificationUrl(notification) {
   if (notification.type === 'friend_request') return '/friends?tab=requests'
+  if (notification.type === 'call') return '/calls'
   if (notification.conversationId) return `/groups/${notification.conversationId}`
   if (notification.type === 'message' && notification.actor?.id) {
     return `/chatbox/${notification.actor.id}`
@@ -28,11 +29,14 @@ export default function NotificationsMenu() {
   const [unreadMessages, setUnreadMessages] = useState(0)
   const [hasMore, setHasMore] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [open, setOpen] = useState(false)
   const [error, setError] = useState('')
   const pageRef = useRef(1)
   const seenMessageIds = useRef(new Set())
+  const seenNotificationIds = useRef(new Set())
   const unreadMessageRequestRef = useRef(0)
+  const menuRef = useRef(null)
 
   const refreshUnreadMessages = useCallback(async () => {
     const requestId = ++unreadMessageRequestRef.current
@@ -43,9 +47,13 @@ export default function NotificationsMenu() {
   }, [])
 
   const loadNotifications = useCallback(async () => {
+    setLoading(true)
     try {
       const result = await apiRequest('/notifications?page=1')
       setNotifications(result.notifications)
+      result.notifications.forEach((notification) => {
+        seenNotificationIds.current.add(notification.id)
+      })
       setUnreadCount(result.unreadCount)
       setHasMore(result.hasMore)
       pageRef.current = 1
@@ -53,6 +61,8 @@ export default function NotificationsMenu() {
       setError('')
     } catch (requestError) {
       setError(requestError.message)
+    } finally {
+      setLoading(false)
     }
   }, [refreshUnreadMessages])
 
@@ -62,15 +72,55 @@ export default function NotificationsMenu() {
 
   useEffect(() => {
     if (!socket) return undefined
+
+    let connectedBefore = socket.connected
+    const handleConnect = () => {
+      if (connectedBefore) loadNotifications()
+      connectedBefore = true
+    }
+    socket.on('connect', handleConnect)
+    return () => socket.off('connect', handleConnect)
+  }, [loadNotifications, socket])
+
+  useEffect(() => {
+    if (!open) return undefined
+
+    function closeOnOutsideClick(event) {
+      if (!menuRef.current?.contains(event.target)) setOpen(false)
+    }
+    function closeOnEscape(event) {
+      if (event.key === 'Escape') setOpen(false)
+    }
+
+    document.addEventListener('pointerdown', closeOnOutsideClick)
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsideClick)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [open])
+
+  useEffect(() => {
+    if (!socket) return undefined
     const handleNew = (notification) => {
+      if (seenNotificationIds.current.has(notification.id)) return
+      seenNotificationIds.current.add(notification.id)
       setNotifications((current) => insertNotification(current, notification))
-      setUnreadCount((current) => current + 1)
+      if (!notification.readAt) setUnreadCount((current) => current + 1)
     }
     const handleReadAll = () => {
       setNotifications((current) => current.map((item) => (
         item.readAt ? item : { ...item, readAt: new Date().toISOString() }
       )))
       setUnreadCount(0)
+    }
+    const handleRead = ({ notificationId, readAt, unreadCount: nextUnreadCount }) => {
+      setNotifications((current) => current.map((item) => (
+        item.id === notificationId && !item.readAt
+          ? { ...item, readAt }
+          : item
+      )))
+      setUnreadCount(nextUnreadCount)
     }
     const handleMessagesRead = ({ actorId, count }) => {
       setNotifications((current) => current.map((item) => (
@@ -83,6 +133,7 @@ export default function NotificationsMenu() {
 
     socket.on('notification:new', handleNew)
     socket.on('notification:read-all', handleReadAll)
+    socket.on('notification:read', handleRead)
     socket.on('notification:messages-read', handleMessagesRead)
     const handleNewMessage = (message) => {
       const recipientId = message.recipient?.id ?? message.recipient
@@ -107,6 +158,7 @@ export default function NotificationsMenu() {
     return () => {
       socket.off('notification:new', handleNew)
       socket.off('notification:read-all', handleReadAll)
+      socket.off('notification:read', handleRead)
       socket.off('notification:messages-read', handleMessagesRead)
       socket.off('message:new', handleNewMessage)
       socket.off('messages:read', handleMessagesReadCount)
@@ -120,7 +172,16 @@ export default function NotificationsMenu() {
     try {
       const nextPage = pageRef.current + 1
       const result = await apiRequest(`/notifications?page=${nextPage}`)
-      setNotifications((current) => [...current, ...result.notifications])
+      result.notifications.forEach((notification) => {
+        seenNotificationIds.current.add(notification.id)
+      })
+      setNotifications((current) => {
+        const byId = new Map(current.map((notification) => [notification.id, notification]))
+        result.notifications.forEach((notification) => byId.set(notification.id, notification))
+        return [...byId.values()].sort(
+          (first, second) => new Date(second.createdAt) - new Date(first.createdAt),
+        )
+      })
       setHasMore(result.hasMore)
       pageRef.current = nextPage
     } catch (requestError) {
@@ -159,13 +220,17 @@ export default function NotificationsMenu() {
   }
 
   return (
-    <div className='notifications-menu'>
+    <div className='notifications-menu' ref={menuRef}>
       <button
         type='button'
         className='notifications-trigger'
         aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ''}`}
         aria-expanded={open}
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => {
+          const nextOpen = !open
+          setOpen(nextOpen)
+          if (nextOpen) loadNotifications()
+        }}
       >
         <FontAwesomeIcon icon={faBell} />
         {unreadCount > 0 && <span className='notification-badge'>{unreadCount > 99 ? '99+' : unreadCount}</span>}
@@ -175,6 +240,7 @@ export default function NotificationsMenu() {
         className='notifications-trigger'
         aria-label={`Messages${unreadMessages ? `, ${unreadMessages} unread` : ''}`}
         title='Messages'
+        onClick={() => setOpen(false)}
       >
         <FontAwesomeIcon icon={faEnvelope} />
         {unreadMessages > 0 && <span className='notification-badge'>{unreadMessages > 99 ? '99+' : unreadMessages}</span>}
@@ -209,7 +275,8 @@ export default function NotificationsMenu() {
                 {!notification.readAt && <span className='notification-unread-dot' aria-label='Unread' />}
               </Link>
             ))}
-            {!notifications.length && !error && <p className='notifications-empty'>You’re all caught up.</p>}
+            {loading && !notifications.length && <p className='notifications-empty' role='status'>Loading notifications...</p>}
+            {!loading && !notifications.length && !error && <p className='notifications-empty'>You’re all caught up.</p>}
             {hasMore && (
               <button
                 type='button'
